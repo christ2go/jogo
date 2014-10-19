@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+		<title>interpreter</title>
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<link rel="shortcut icon" href="/favicon.ico">
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+	</head>
+
+	<body>
+		<div>
+			<header>
+				<h1>Logo Interpreter</h1>
+			</header>
+			<nav></nav>
+
+			<div>
+
+				<!-- INTERPRETER GOES HERE -->
+				<script>
+					//
+					function logointerpreter() {
+						/*
+						 * Stream => stream class
+						 * Turtle => turtle object
+						 * text => code to be executed
+						 */
+						var self = this;
+						// 1st Parse the String
+						// "fd 100" => ["fd",100]
+						// TODO Remove comments frome logo code
+						this.tokenize = function(input) {
+							var tokens = [];
+							// Iterate over String
+							var index = 0, whitespace = 0;
+							while (index < input.length) {
+								if (input[index] == " ") {
+									index++;
+								}
+								if (input[index] == "[") {
+									// Beginning of a list found => parseList
+									var liste = this.parseliste(input.slice(index));
+									tokens[tokens.length] = liste[0];
+									index += liste[1];
+									index++;
+								} else if (input[index] == "\"") {
+									// " Found => Beginning of a string
+									var liste = this.parsestring(input.slice(index));
+									tokens[tokens.length] = liste[0];
+									index += liste[1];
+								} else {
+
+									var liste = this.parsestring(input.slice(index));
+									tokens[tokens.length] = liste[0];
+									index += liste[1];
+								}
+
+								// Append parsed
+							}
+							return tokens;
+						};
+
+						this.parseliste = function(string) {
+							var liste = [];
+							// Array für die Liste selbst
+
+							for (var i = 1; i < string.length; i++) {
+								element = string[i];
+								if (element == " ") 
+								{
+									// Move on to next
+
+								}
+								if (element == "]") 
+								{
+									return [liste, i];
+								}
+
+								if (element == "[") 
+								{
+									// Run the function itself
+									//console.log(liste);
+									var neueliste = (this.parseliste(string.slice(i)));
+
+									i += (this.parseliste(string.slice(i)))[1];
+									liste[liste.length] = neueliste[0];
+								}
+								else 
+								{
+									liste[liste.length] = this.parsestring(string.slice(i),true,true)[0];
+									i += this.parsestring(string.slice(i),true,true)[1];
+
+								}
+
+							}
+							return [liste, i];
+							// Return statement
+
+						};
+
+						this.parsestring = function(stringel, ohneanfuehrungszeichen, calledfromlist) {
+							var string = "";
+							var returnfromlist = false;
+							if(stringel[0] == "\"")
+							{
+								string = "\"";
+							}
+
+							if (!ohneanfuehrungszeichen && stringel[0] != "\"") {
+								// 
+								stringel = "\"" + stringel;
+								returnfromlist = true;
+								// 
+							}
+							if (!calledfromlist) {
+								calledfromlist = false;
+							}
+							var escaped = false;
+							
+							// Used for parsing strings in Logo
+							for (var index = 0; index < stringel.length; index++) {
+
+								var element = stringel[index];
+								if (element == "]" && calledfromlist == true && escaped == false) {
+									return [string, index-1];
+								}
+								if(element == "[" && returnfromlist == true)
+								{
+									return [string, index-1];
+								}
+								if (element != "\\" && escaped == false && element != "\"") {
+									
+									if (element == " ") {
+										return [string, index];
+									}
+									string = string + element;
+
+								} else if (escaped == true) {
+									// Check for escape characters
+									if (element == " ") {
+										string = string + " ";
+									}
+									if (element == "n") {
+										string = string + "\n";
+									}
+									if (element == "\t") {
+										string = string + "\t";
+									}
+									// TODO Add new escape characters
+									escaped = false;
+								} else if (element == "\\") {
+									escaped = true;
+								}
+
+							}
+							return [string, index];
+						};
+						
+						this.define = function(funcnames,fn,fnarity)
+						{
+							// Function for defining functions
+							
+						};
+						
+						this.translate = function(lang,engname,gername)
+						{
+							
+						}
+
+					}
+					// TODO Minus vor zahl (operandenlos)
+					// TODO Funktionen mit mehr als einem Argument => Satz korrekt darstellen
+					
+					test = new logointerpreter();
+					console.log((test.tokenize("repeat 4[rt 9]")));
+					
+					// Interpretation
+					
+					
+					// Definition von Funktionen
+					
+					var globaltable = test;
+					
+					// Data Structure PRIMITIVES
+					function ltype(atom)
+					{
+						// Function which returns a logo like type
+						if(typeof atom === 'string')
+						{
+							return "word";
+						}
+						if(typeof atom === 'object')
+						{
+							return "list";
+						}
+						if(typeof atom === 'number')
+						{
+							return "number";
+						}
+						
+						// TODO Throw error => not a Logo Type but bollean maybe?
+					}
+					// Constructors
+					globaltable.define(["list"],function(a,b){
+						// n elements but at least 2
+						if(!a || !b)
+						{
+							// Not enough inputs
+							// TODO Throw an error
+							
+						}
+						var liste = [];
+						for(var argc = 0;argc<arguments.length;argc++)
+						{
+							liste[liste.length] = arguments[argc];
+						}
+						
+						return liste;
+						
+					},-1);
+					
+					globaltable.define(["word"],function(a,b){
+						// n elements but at least 2
+						if(!a || !b)
+						{
+							// Not enough inputs
+							// TODO Throw an error
+							
+						}
+						var wort = "";
+						for(var argc = 0;argc<arguments.length;argc++)
+						{
+							if(ltype(arguments[argc]) == "list")
+							{
+								// TODO Throw an error => list can't be sentenced
+								
+							}
+							wort = wort + arguments[argc];
+						}
+						
+						return wort;
+						
+					},-1);
+					
+					globaltable.define(["sentence","se"],function(a,b){
+						// n elements but at least 2
+						if(!a || !b)
+						{
+							// Not enough inputs
+							// TODO Throw an error
+							
+						}
+						var sentence = "";
+						for(var argc = 0;argc<arguments.length;argc++)
+						{
+							if(ltype(arguments[argc]) == "list")
+							{
+								// TODO Throw an error => list can't be sentenced
+								
+							}
+							sentence = sentence + arguments[argc] + " ";
+						}
+						
+						return sentence;
+						
+					},-1);
+					
+					globaltable.define(["fput"],function(a,b){
+						// n elements but at least 
+						if(!a || !b)
+						{
+							// Not enough inputs
+							// TODO Throw an error
+							
+						}
+						var list = b;
+						var extra = a;
+						if(list == extra){
+							// TODO Zirkuläre Liste
+						}
+						list.push(extra);
+						return list;
+						
+					});
+					
+					globaltable.define(["fput"],function(a,b){
+						// n elements but at least 
+						if(!a || !b)
+						{
+							// Not enough inputs
+							// TODO Throw an error
+							
+						}
+						var list = b;
+						var extra = a;
+						if(list == extra){
+							// TODO Zirkuläre Liste
+						}
+						list.push(extra);
+						return list;
+						
+					});
+					
+					globaltable.define(["lput"],function(a,b){
+						// n elements but at least 
+						if(!a || !b)
+						{
+							// Not enough inputs
+							// TODO Throw an error
+							
+						}
+						var list = b;
+						var extra = a;
+						if(list == extra){
+							// TODO Zirkuläre Liste
+						}
+						list[list.length] = extra;
+						return list;
+						
+					});
+					
+					/*
+					 * NOT SUPPORTED : ARAY MDARRAY LISTTOARRAY (ARRAYS IN GENERAL)
+					 */
+					
+					// SELECTORS
+					
+					
+					
+					
+				</script>
+
+			</div>
+
+			<footer>
+			</footer>
+		</div>
+	</body>
+</html>
