@@ -166,17 +166,24 @@
 							}
 							return [string, index];
 						};
-						
+						this.primitives = [];
 						this.define = function(funcnames,fn,fnarity)
 						{
 							// Function for defining functions
+							if(!fnarity)
+							{
+								fnarity = fn.length; 
+							}
+							// TODO Check if funcname is already used
 							
+							this.primitives[this.primitives.length] = [funcnames,fn,fnarity]; 
+							console.log([funcnames,fn,fnarity]);
 						};
 						
 						this.translate = function(lang,engname,gername)
 						{
 							
-						}
+						};
 
 					}
 					// TODO Minus vor zahl (operandenlos)
@@ -336,7 +343,292 @@
 					
 					// SELECTORS
 					
+					globaltable.define(["first"],function(list){
+						if(!list)
+						{
+							// No argument supplied
+						}
+						if(typeof list === "undefined" )
+						{
+							// Return with error
+						}
+						if(list.length == 0)
+						{
+							return "";
+						}
+						return list[0];
+
+					});
 					
+					globaltable.define(["firsts"],function(list){
+						// TODO Type checking
+						if(ltype(list) != "list")
+						{
+							// TODO Throw TypeError
+						}
+						var liste = [];
+						for(var index = 0;index<list.length;index++)
+						{
+							// TODO Check if element [0] doesn't exist
+							liste.push(list[index][0]);
+						}
+						return liste;
+					});
+					
+					globaltable.define(["last"],function(wordorlist){
+						if(false) // TODO Type-checking wordorlist
+						{
+							// TODO Throw an error
+						}
+						if(!wordorlist.length >= 1)
+						{
+							// TODO error	
+						}
+						return wordorlist[wordorlist.length-1];
+						
+					});
+					
+					globaltable.define(["butfirst","bf"],function(wordorlist){
+						if(false) // TODO Type-checking wordorlist
+						{
+							// TODO Throw an error
+						}
+						if(!wordorlist.length >= 1)
+						{
+							// TODO error	
+						}
+						return wordorlist.slice(1);
+						
+					});
+					
+					globaltable.define(["butfirsts"],function(list){
+						// TODO Type checking
+						if(ltype(list) != "list")
+						{
+							// TODO Throw TypeError
+						}
+						var liste = [];
+						for(var index = 0;index<list.length;index++)
+						{
+							// TODO Check if element [0] doesn't exist
+							liste.push(list[index].slice(1));
+						}
+						return liste;
+					});
+					
+					globaltable.define(["butlast","bl"],function(wordorlist){
+						if(false) // TODO Type-checking wordorlist
+						{
+							// TODO Throw an error
+						}
+						if(!wordorlist.length >= 1)
+						{
+							// TODO error	
+						}
+						return wordorlist.slice(0,wordorlist.length-2);
+						
+					});
+					
+					globaltable.define(["item"],function(index,thing){
+						// TODO wordorlist
+						return thing[index-1];
+					});
+					
+					// TODO Quoted
+					
+					//MUTATORS
+					
+					/*
+					 * The following primitves work different as in UCBLogo
+					 * * setitem: Only sets 1 item, doesn't every occuarence of element
+					 */
+					globaltable.define(["setitem"],function(index,list,value){
+						// TODO wordorlist
+						if(index <= list.length){
+							
+						}
+						if(value == list)
+						{
+							// TODO Circular list? Copy first
+						}
+						list[index-1] = value;
+						return list;
+					});
+					
+					// MISIING setbutfirst,array mutation
+					
+					// Predicates
+					
+					globaltable.define(["wordp","word?"],function(word){
+						if(ltype(word) == "word")
+						{
+							return true;
+						}else{
+							return false;
+						}
+					});
+					
+					globaltable.define(["listp","list?"],function(word){
+						if(ltype(word) == "list")
+						{
+							return true;
+						}else{
+							return false;
+						}
+					});
+					
+					globaltable.define(["emptyp","empty?"],function(word){
+						if(ltype(word) == "word")
+						{
+							if(word == "")
+							{
+								return true;
+							}
+						}else if(ltype(word) == "list"){
+							if(word == [])
+							{
+								return true;
+							}
+						}
+						return false;
+					});
+					
+					globaltable.define(["equalp","equal?"],function(a,b){
+						
+						if(a == b)
+						{
+							return true;
+						}
+						return false;
+					});
+					// TODO beforep
+					// MISSING .eq (no nodes in js)
+					
+					globaltable.define(["memberp","member?"],function(thing1,thing2){
+						 // Using indexof
+						 if(thing2.indexof(thing2) != -1)
+						 {
+						  return true;
+						 }
+						 return false;
+					});
+					
+					globaltable.define(["numberp","number"],function(x){
+						if(!isNan(x) && x != "")
+						{
+							return true;
+						}
+						// TODO Might not be correct ... ?
+					});
+					// MISSING backslashedp
+					
+					// Queries
+					globaltable.define(["count"],function(wordorlist){
+						// TODO Type Checking (wordorlist)
+						return wordorlist.length;
+					});
+					globaltable.define(["ascii"],function(char){
+						if(ltype(char) != "word")
+						{
+							// TODO Throw Type Error
+						}
+						if(char.length != 1)
+						{
+							// TODO Throw length error (return 0)
+						}
+						return char[0].charCodeAt(0);
+					});
+					// MISSING rawascii
+					globaltable.define(["char"],function(x){
+						// TODO Type-check: x is Int
+						return String.fromCharCode(x);
+					});
+					
+					globaltable.define(["member"],function(thing1,thing2){
+						// TODO Implementation
+					});
+					
+					globaltable.define(["lowercase"],function(word){
+						if(ltype(word) != "word")
+						{
+							// TODO Raise an error
+						}
+						return word.toLowerCase();
+					});
+					
+					globaltable.define(["uppercase"],function(word){
+						if(ltype(word) != "word")
+						{
+							// TODO Raise an error
+						}
+						return word.toUpperCase();
+					});
+					
+					// Missing parse
+					// Missing standout
+					// Missing runparse
+					
+					// TODO Transmitters
+					
+					// Recievers
+					globaltable.define(["readlist","rl"],function(){
+						var result = prompt("Please enter a list", "");
+						// TODO Parse the list
+					});
+					
+					globaltable.define(["readword","rw"],function(){
+						var result = prompt("Please enter a word", "");
+						return result;
+					});
+					
+					globaltable.define(["readchar","rc"],function(){
+						var result = prompt("Please enter a character", "");
+						// TODO Parse the list
+						
+						return result[0];
+					});
+					
+					// TODO readchars
+					
+					// TODO FILEACCESS (Using ajax???)
+					
+					// TODO Terminal Access
+					
+					// Arithmetic
+					
+					globaltable.define(["sum"],function(){
+						var result;
+						for(var index = 0; index<arguments.length;index++)
+						{
+							try{
+								result += parseFloat(arguments[index]);
+							}catch(err){
+								// TODO Throw an error
+							}
+						}
+					},-1);
+					
+					globaltable.define(["difference"],function(num1,num2)
+					{
+						try{
+							return parseFloat(num1)-parseFloat(num2);
+						}catch(err)
+						{
+							// TODO Throw an error
+						}
+					});
+					
+					globaltable.define(["product"],function(){
+						var result = arguments[0];
+						for(var index = 1; index<arguments.length;index++)
+						{
+							try{
+								result *= parseFloat(arguments[index]);
+							}catch(err){
+								// TODO Throw an error
+							}
+						}
+					},-1);
 					
 					
 				</script>
