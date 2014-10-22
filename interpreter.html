@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
@@ -12,7 +13,7 @@
 		<meta name="author" content="">
 
 		<meta name="viewport" content="width=device-width; initial-scale=1.0">
-
+		 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.1.min.js"></script>
 		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
 		<link rel="shortcut icon" href="/favicon.ico">
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -26,10 +27,19 @@
 			<nav></nav>
 
 			<div>
-
+				<textarea id="mycode"></textarea><br />
+				<button type="submit" id="codesubmit">Absenden</button>
 				<!-- INTERPRETER GOES HERE -->
 				<script>
 					//
+					test = new logointerpreter();
+
+					$("#codesubmit").click(function(){
+							var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm," ");
+							var me = test.tokenize(code);
+							console.log(me);
+							console.log((test.parseinfix(me)));
+					});
 					function logointerpreter() {
 						/*
 						 * Stream => stream class
@@ -62,6 +72,11 @@
 								} else {
 
 									var liste = this.parsestring(input.slice(index));
+									if(liste[0] == "-" && (parseNum(tokens[tokens.length-1]) === false || tokens[tokens.length-1] === undefined))
+									{
+										
+										liste[0] = "MINUS";	// Unary minus
+									}
 									tokens[tokens.length] = liste[0];
 									index += liste[1];
 								}
@@ -98,8 +113,8 @@
 								}
 								else 
 								{
-									liste[liste.length] = this.parsestring(string.slice(i),true,true)[0];
-									i += this.parsestring(string.slice(i),true,true)[1];
+									liste[liste.length] = this.parseliststring(string.slice(i),true,true)[0];
+									i += this.parseliststring(string.slice(i),true,true)[1];
 
 								}
 
@@ -112,19 +127,107 @@
 						this.parsestring = function(stringel, ohneanfuehrungszeichen, calledfromlist) {
 							var string = "";
 							var returnfromlist = false;
+							if (!calledfromlist) {
+								calledfromlist = false;
+							}
+							if(!calledfromlist)
+							{
 							if(stringel[0] == "\"")
 							{
 								string = "\"";
 							}
-
+							if(stringel[0] == "+")
+							{
+								return ["+",1];
+							}
+							if(stringel[0] == "-")
+							{
+								return ["-",1];
+							}
+							if(stringel[0] == "*")
+							{
+								return ["*",1];
+							}
+							if(stringel[0] == "/")
+							{
+								return ["/",1];
+							}
+							if(stringel[0] == "(")
+							{
+								return ["(",1];
+							}
+							if(stringel[0] == ")")
+							{
+								return [")",1];
+							}
+							}
 							if (!ohneanfuehrungszeichen && stringel[0] != "\"") {
 								// 
 								stringel = "\"" + stringel;
 								returnfromlist = true;
 								// 
 							}
+							var escaped = false;
+							
+							// Used for parsing strings in Logo
+							for (var index = 0; index < stringel.length; index++) {
+
+								var element = stringel[index];
+								if (element == "]" && calledfromlist == true && escaped == false) {
+									return [string, index-1];
+								}
+								if((element == "+" || element == "-" || element == "*" || element == "/" || element == "(" || element == ")")  && (parseNum(string) != false && calledfromlist == false ))
+								{
+									if(returnfromlist)
+									{
+										return [string, index-1];
+									}
+								}
+								if(element == "[" && returnfromlist == true)
+								{
+									return [string, index-1];
+								}
+								if (element != "\\" && escaped == false && element != "\"") {
+									
+									if (element == " ") {
+										return [string, index];
+									}
+									string = string + element;
+
+								} else if (escaped == true) {
+									// Check for escape characters
+									if (element == " ") {
+										string = string + " ";
+									}
+									if (element == "n") {
+										string = string + "\n";
+									}
+									if (element == "\t") {
+										string = string + "\t";
+									}
+									// TODO Add new escape characters
+									escaped = false;
+								} else if (element == "\\") {
+									escaped = true;
+								}
+
+							}
+							return [string, index];
+						};
+						this.parseliststring = function(stringel, ohneanfuehrungszeichen, calledfromlist) 
+						{
+							
+							var string = "";
+							var returnfromlist = false;
 							if (!calledfromlist) {
 								calledfromlist = false;
+							}
+							
+							if (!ohneanfuehrungszeichen && stringel[0] != "\"") {
+								// 
+								stringel = "\"" + stringel;
+								returnfromlist = true;
+								// 
 							}
 							var escaped = false;
 							
@@ -179,18 +282,130 @@
 							this.primitives[this.primitives.length] = [funcnames,fn,fnarity]; 
 							console.log([funcnames,fn,fnarity]);
 						};
+						this.parseinfix = function(array)
+						{
+							array.reverse;
+							stack = []; // Stack
+							prefixlist = []; // List with commands
+							for(var i = array.length-1;i>=0;i--)
+							{
+								var element = array[i];
+
+								if(is_operand(element))
+								{
+									prefixlist[prefixlist.length] = element;
+								}
+								
+								if(is_operator(element))
+								{
+										while((!stack_empty(stack)) && precedence(element) <= precedence(stack_top(stack)) ){
+											// Add while part
+											prefixlist[prefixlist.length] = stack_top(stack);
+											pop_stack(stack);
+										}
+										push_stack(stack,element);
+
+								}
+								if(element == ")")
+								{
+										push_stack(stack,")");	
+								}
+								
+								if(element == "(")
+								{
+									while(stack_top(stack) != ")")
+									{
+										var append_operator = pop_stack(stack);
+										prefixlist[prefixlist.length] = append_operator;
+									}
+									pop_stack(stack);		
+							}
+						}
 						
+						while(!stack_empty(stack))
+						{
+								if(stack_top(stack) == ")")
+								{
+									pop_stack(stack);	
+								}
+								else
+								{
+									prefixlist[prefixlist.length] = pop_stack(stack);	
+								}
+						}
+						prefixlist.reverse();
+						console.log(prefixlist);
+	
+						};
+						// Helepers for Infix
+						function is_operand(opr)
+						{
+							return !is_operator(opr) && (opr != "(" && opr != ")") ? 1:0	
+						}
+						function is_operator(opr)
+						{
+							if(opr == "+")
+							{
+								return true;
+							}
+							if(opr == "-")
+							{
+								return true;
+							}
+							if(opr == "*")
+							{
+								return true;
+							}
+							if(opr == "/")
+							{
+								return true;
+							}	
+							if(opr == "^")
+							{
+								return true;
+							}
+							// TODO Modulo maybe
+							if(opr == "$")
+							{
+								return true;
+							}
+							return false;
+						}
+							// Stack Helpers
+						function stack_empty(stack)
+						{
+							return stack.length == 0 ? true : false;	
+						}
+						function stack_top(stack)
+						{
+							return stack[stack.length-1]	
+						}
+						function pop_stack(stack)
+						{
+							return stack.pop();	
+						}
+						function push_stack(stack,el)
+						{
+							stack[stack.length] = el;	
+						}
+						function precedence(operator)
+						{
+							if(operator == "^" || operator == "$") {return 7;}
+							if(operator ==  "*" ){return 6;}
+							if(operator ==  "/" ){return 5;}
+							if(operator ==  "+" ){return 4;}
+							if(operator ==  "-" ){return 3;}
+							if(operator ==  "(" ){return 2;}
+							if(operator ==  ")" ){return 1;}
+						}
 						this.translate = function(lang,engname,gername)
 						{
 							
 						};
 
 					}
-					// TODO Minus vor zahl (operandenlos)
 					// TODO Funktionen mit mehr als einem Argument => Satz korrekt darstellen
 					
-					test = new logointerpreter();
-					console.log((test.tokenize("repeat 4[rt 9]")));
 					
 					// Interpretation
 					
@@ -217,6 +432,22 @@
 						}
 						
 						// TODO Throw error => not a Logo Type but bollean maybe?
+					}
+					
+					function parseNum(number)
+					{
+						// A function for parsing strings to numbers (conversion)
+						if(number == "")
+						{
+							return false;
+						}
+						if(!isNaN(number))
+						{
+							return parseFloat(number);
+						}
+						else{
+							return false;
+						}
 					}
 					// Constructors
 					globaltable.define(["list"],function(a,b){
@@ -596,40 +827,290 @@
 					
 					// Arithmetic
 					
-					globaltable.define(["sum"],function(){
-						var result;
-						for(var index = 0; index<arguments.length;index++)
+					globaltable.define(["sum"],function(a,b)
+					{
+						var result = 0;
+						if(arguments.length != 2)
 						{
-							try{
-								result += parseFloat(arguments[index]);
-							}catch(err){
-								// TODO Throw an error
-							}
+							// TODO 
 						}
+						for(var index = 0;index<arguments.length;index++)
+						{
+							var input = arguments[index];
+							var number = parseNum(input);
+							if(number === false) // Type Checking, because 0 might be evaluated as false
+							{
+							// TODO Throw numerror
+							}
+							result += number;
+						}
+						return number;
 					},-1);
 					
-					globaltable.define(["difference"],function(num1,num2)
-					{
-						try{
-							return parseFloat(num1)-parseFloat(num2);
-						}catch(err)
+					globaltable.define(["difference"],function(a,b){
+						if(!a || !b)
+						{
+							// TODO die with error
+						}
+						var num1 = parseNum(a);
+						var num2 = parseNum(b);
+						
+						if(a === false)
 						{
 							// TODO Throw an error
 						}
-					});
-					
-					globaltable.define(["product"],function(){
-						var result = arguments[0];
-						for(var index = 1; index<arguments.length;index++)
+						if(b === false)
 						{
-							try{
-								result *= parseFloat(arguments[index]);
-							}catch(err){
-								// TODO Throw an error
-							}
+							// TODO Throw an error
 						}
+						return a-b;
+					});
+					// TODO Type checking in product
+					globaltable.define(["product"],function(a,b){
+						var result = parseNum(arguments[0]);
+						if(arguments.length != 2)
+						{
+							// TODO 
+						}
+						for(var index = 1;index<arguments.length;index++)
+						{
+							var input = arguments[index];
+							var number = parseNum(input);
+							if(number === false) // Type Checking, because 0 might be evaluated as false
+							{
+							// TODO Throw numerror
+							}
+							result *= number;
+						}
+						return number;
 					},-1);
 					
+					globaltable.define(["modulo"],function(a,b){
+						if(!a || !b)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						var num2;
+						// Check if this works
+						if(num2 = parseNum(b) === false)
+						{
+							// TODO numerror
+						}
+						
+						return ((num2 % num1) + num1) % num1;
+					});
+					
+					globaltable.define(["remainder"],function(a,b){
+						if(!a || !b)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						var num2;
+						// Check if this works
+						if(num2 = parseNum(b) === false)
+						{
+							// TODO numerror
+						}
+						
+						return num1%num2;
+					});
+					
+					
+					globaltable.define(["int"],function(a){
+						if(!a)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						
+						return ~~num1;
+					});
+					
+					globaltable.define(["round"],function(a){
+						if(!a)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						
+						return Math.round(num1);
+					});			
+					
+					globaltable.define(["sqrt"],function(a){
+						if(!a)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						
+						if(num1 < 0)
+						{
+							// Throw an error
+						}
+						return Math.sqrt(num1);
+					});
+					
+					globaltable.define(["round"],function(a,b){
+						if(!a || !b)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						
+						var num2;
+						// Check if this works
+						if(num2 = parseNum(b) === false)
+						{
+							// TODO numerror
+						}
+						
+						return Math.pow(num1,num2);
+					});
+					
+					globaltable.define(["exp"],function(a){
+						if(!a)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						
+						if(num1 < 0)
+						{
+							// Throw an error
+						}
+						return Math.exp(num1);
+					});
+					// MISSING log10
+					globaltable.define(["ln"],function(a){
+						if(!a)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						
+						if(num1 < 0)
+						{
+							// Throw an error
+						}
+						return Math.log(num1);
+					});
+					
+					globaltable.define(["sin"],function(a){
+						if(!a)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						
+						if(num1 < 0)
+						{
+							// Throw an error
+						}
+						return Math.sin(num1);
+					});
+					
+					// Missing radsin
+					
+					globaltable.define(["cos"],function(a){
+						if(!a)
+						{
+							// TODO argerror
+						}
+						var num1;
+						// Check if this works
+						if(num1 = parseNum(a) === false)
+						{
+							// TODO numerror
+						}
+						
+						if(num1 < 0)
+						{
+							// Throw an error
+						}
+						return Math.cos(num1);
+					});
+					// Missing radcos
+					// Missing arctan
+					// Missing ractarn
+					
+					// PREDICATES
+					globaltable.define(["lessp","less?"],function(a,b){
+						if(!a || !b)
+						{ /* error */ }
+						if(a<b)
+						{
+							return true;
+						}
+						return false;
+					});
+					
+					globaltable.define(["greaterp","greater?"],function(a,b){
+						if(!a || !b)
+						{ /* error */ }
+						if(a>b)
+						{
+							return true;
+						}
+						return false;
+					});
+					
+					globaltable.define(["random"],function(highest){
+						var num_highest;
+						if((num_highest = parseNum(highest)) == false)
+						{
+							// TODO dye with error
+						}
+						return Math.floor((Math.random() * num_highest)); 
+					});
+					
+					// MISSING rerandom
 					
 				</script>
 
