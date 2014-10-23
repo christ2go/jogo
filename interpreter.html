@@ -36,20 +36,95 @@
 
 					$("#codesubmit").click(function(){
 							var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm," ");
-							var me = test.tokenize(code);
-							console.log(me);
-							console.log((test.parseinfix(me)));
+							console.log(test.evaluate(code));
+							//console.log((test.parseinfix(me)));
 					});
 					function logointerpreter() {
-						/*
-						 * Stream => stream class
-						 * Turtle => turtle object
-						 * text => code to be executed
-						 */
 						var self = this;
 						// 1st Parse the String
 						// "fd 100" => ["fd",100]
 						// TODO Remove comments frome logo code
+						this.evaluate = function(code)
+						{
+							// Main Interpreter function, used for evaluating the code
+							this.parse_code(code);
+								
+						}
+						this.parse_code = function(code)
+						{
+							// 1st Tokenize the Input
+							var code = this.tokenize(code);
+							var klammern = 0;
+							for(var index = 0;index<code.length;index++)
+							{
+								if(code[index] == "(")
+								{
+									klammern++;	
+								}
+								if(code[index] == ")")
+								{
+									klammern--;	
+								}	
+							}
+							
+							if(klammern != 0)
+							{
+								alert("Klammer Fehler");
+								return;	
+							}
+							// TODO Check for multi arg func and turn ( into <margbeg> if multiarg
+							for(var index = 0;index<code.length;index++)
+							{
+									
+							}
+							for(var index = 0; index<code.length;index++)
+							{
+								var element = code[index];
+								// Check if element is a number and element+1 is an operator
+								if(!parseNum(element) === false || element == "MINUS" || element == "(" || element == ")")
+								{
+									// Found a number	or operator => look for end
+									var myindex = index;
+									var tokens = [];
+									var parans = 0;
+									var isnum;
+									var startindex = index;
+									while((parseNum(code[myindex]) != false || is_operator(code[myindex]) || code[myindex] == "MINUS" || code[myindex] == "(" || code[myindex] == ")") || parans != 0)
+									{
+										var old_isnum = isnum;
+										if(parseNum(code[myindex]) != false)
+										{
+											isnum = true;	
+										}else{
+											isnum = false;	
+										}
+										if(old_isnum == isnum)
+										{
+											tokens = [];	
+											startindex = myindex;
+										}
+										if(code[myindex] == "(")
+										{
+											parans++;
+										}
+										if(code[myindex] == ")")
+										{
+											parans--;
+										}
+										tokens[tokens.length] = code[myindex];	
+										myindex++;
+										console.log(tokens);
+									}
+									old_index = startindex;
+									
+									index = myindex;
+									tokens = this.parseinfix(tokens);
+									code.splice.apply(code, [old_index, myindex-old_index].concat(tokens));
+								}	
+								// TODO Parsing of boolean expressions
+							}	
+							alert(code);
+						}
 						this.tokenize = function(input) {
 							var tokens = [];
 							// Iterate over String
@@ -334,7 +409,7 @@
 								}
 						}
 						prefixlist.reverse();
-						console.log(prefixlist);
+						return prefixlist;
 	
 						};
 						// Helepers for Infix
@@ -859,7 +934,7 @@
 						{
 							// TODO Throw an error
 						}
-						if(b === false)
+						if(b === false || b == 0) // Check for b = 0 --> 
 						{
 							// TODO Throw an error
 						}
