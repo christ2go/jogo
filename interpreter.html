@@ -31,11 +31,73 @@
 				<button type="submit" id="codesubmit">Absenden</button>
 				<!-- INTERPRETER GOES HERE -->
 				<script>
-					//
+					// Scoping model
+					function scopeobj(globscope,oldscope)
+					{
+						this.globscope = globscope;
+						this.vars = []; // Local container
+						// The scope handler function
+						if(!oldscope)
+						{
+							// This is root scope
+							this.oldscope = [];	
+						}else{
+							this.oldscope[this.oldscope.length] = oldscope; // Append as last element => searching	
+						}
+						this.setlocal = function(elname,value)
+						{
+							// Check if exists // TODO In global scopes
+							for(var i = 0;i<this.vars.length;i++)
+							{
+									var element = this.vars[i];
+									if(element[0] == elname)
+									{
+										// Change it
+										this.vars[1][1] = value;
+										return;
+									}
+							}
+							// Append
+							this.vars[this.vars.length] = [elname,value];
+							
+						};
+						this.setglobal = function(varname,value)
+						{
+								// Get up to the first apperance
+								
+						}
+						this.get = function(varname)
+						{
+							
+						};
+					}
+					// Handling for tab in textarea
+					$("textarea").keydown(function(e) {
+					    if(e.keyCode === 9) { // tab was pressed
+					        // get caret position/selection
+					        var start = this.selectionStart;
+					        var end = this.selectionEnd;
+					
+					        var $this = $(this);
+					        var value = $this.val();
+					
+					        // set textarea value to: text before caret + tab + text after caret
+					        $this.val(value.substring(0, start)
+					                    + "\t"
+					                    + value.substring(end));
+					
+					        // put caret at right position again (add one for the tab)
+					        this.selectionStart = this.selectionEnd = start + 1;
+									
+					        // prevent the focus lose
+					        e.preventDefault();
+					    }
+					});
+					
 					test = new logointerpreter();
-
+					
 					$("#codesubmit").click(function(){
-							var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm," ");
+							var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm," ").replace("\t"," ");
 							console.log(test.evaluate(code));
 							//console.log((test.parseinfix(me)));
 					});
@@ -44,12 +106,115 @@
 						// 1st Parse the String
 						// "fd 100" => ["fd",100]
 						// TODO Remove comments frome logo code
+						
 						this.evaluate = function(code)
 						{
 							// Main Interpreter function, used for evaluating the code
-							this.parse_code(code);
-								
+							var code = this.parse_code(code);
+							alert(code);
+							this.run(code);
+							/*
+							var teste;
+							teste = this.get_next_eval(code);
+							console.log(teste);
+							// Parse into eval blocks => real eval begins
+							code = code.slice(teste[1].length,code.length);
+							alert(code);
+							*/
 						}
+						this.run = function(code,scope)
+						{
+								if(!scope)
+								{
+									scope = new scopeobj([]);
+								}
+								// Get next func call
+								var run = this.get_next_eval(code);
+								console.log("RUNNABEL",run);
+								this.runit(run[1],scope);
+								
+						};
+						this.runit = function(code,scope)
+						{
+							//alert(">>",code);
+							if(!code)
+							{
+								alert("Code is missing");	
+							}
+							// 1 st to
+							var callarray = [] 
+							for(var index = code.length-1;index >= 0;index --)
+							{
+									console.log(index);
+									if(!this.isproc_orfunc(code[index]))
+									{
+										callarray.unshift(code[index]);	
+									}else{
+										// Found a function call => evaluate
+										callarray.splice(this.getfuncorprocarity(code[index])	);
+										callarray.unshift(code[index]);
+										console.log(callarray);
+										alert(">>",callarray);
+										// TODO replace variables
+										// Lets really EVALUATE this
+										return;
+									}
+							}
+						};
+						this.get_next_eval = function(code)
+						{
+							//alert(code);
+							for(var index = 0;index<code.length;index++)
+							{
+								// Check for procedure definition
+								if(this.isproc_orfunc(code[index]))
+								{
+										var callarrray = [];
+										callarrray[0] = code[index];
+										//console.log("is a function");
+										// Get the funcs arity and append, then return
+										var funcarity = this.getfuncorprocarity(code[index]);
+										//alert("ARITY:"+funcarity);
+										for(var i = 0;i<funcarity;i++)
+										{
+											index++;
+											console.log(code[index]);
+											if(this.isproc_orfunc(code[index]))
+											{
+												//console.log("NEW CALL:");
+												callarrray[callarrray.length] = code[index];
+												funcarity += this.getfuncorprocarity(code[index]);
+												funcarity--;
+												i--;
+
+											}else{
+												if(code[index] === undefined)
+												{
+													// Missing token for function call
+													console.log("Missing argument for function "+callarrray[0]);
+													// TODO Throw an error	
+												}
+												callarrray[callarrray.length] = code[index];	
+											}	
+										}
+										// MAYBE SPLICE CODE HERE --> no longer needed ?!
+										return [index,callarrray];
+								}	
+							}	
+						}
+						function clone(obj) {
+					    if(obj == null || typeof(obj) != 'object')
+					        return obj;
+					
+					    var temp = obj.constructor(); // changed
+					
+					    for(var key in obj) {
+					        if(obj.hasOwnProperty(key)) {
+					            temp[key] = clone(obj[key]);
+					        }
+					    }
+					    return temp;
+					}
 						this.parse_code = function(code)
 						{
 							// 1st Tokenize the Input
@@ -67,16 +232,17 @@
 								}	
 							}
 							
+							
 							if(klammern != 0)
 							{
 								alert("Klammer Fehler");
 								return;	
 							}
-							// TODO Check for multi arg func and turn ( into <margbeg> if multiarg
-							for(var index = 0;index<code.length;index++)
-							{
-									
-							}
+							
+							
+							code = this.multiargparans(code);
+							// Booleans CAN ONLY be parsed correctly at execution time
+							
 							for(var index = 0; index<code.length;index++)
 							{
 								var element = code[index];
@@ -121,9 +287,84 @@
 									tokens = this.parseinfix(tokens);
 									code.splice.apply(code, [old_index, myindex-old_index].concat(tokens));
 								}	
-								// TODO Parsing of boolean expressions
+								
+								for(var index=0;index<code.length;index++)
+								{
+									if(code[index] == "-"){code[index] = "difference";}
+									if(code[index] == "+"){code[index] = "sum";}
+									if(code[index] == "*"){code[index] = "product";}
+									if(code[index] == "/"){code[index] = "quotient";}  	
+								}
+								// ALL Parsing has to be done here
+								
+								// Parse and define procedures
+								var inproc = false;
+								var vararg = true;
+								var procdef = [[],[],[]];
+								for(var index = 0;index<code.length;index++)
+								{
+									if(this.isspecialtoken(code[index],"to"))
+									{
+										
+										inproc = true;
+										procdef[0] = code[index+1];
+										index++;	
+									}	
+									else if(code[index][0] == ":" && ltype(code[index]) != "list" && vararg == true)
+									{
+										procdef[1][procdef[1].length] = code[index];
+									}else{
+										vararg = false;	
+									}
+									if(this.isspecialtoken(code[index],"end"))
+									{
+										console.log(procdef);
+										// TODO Define the procedure
+										this.define_procedure(procdef[0],procdef[1],procdef[2])
+										code = code.splice(index+1,code.length);
+										index = 0;
+										procdef = [[],[],[]];
+										inproc = false;	
+									}
+									if(inproc == true && vararg == false)
+									{
+										procdef[2][procdef[2].length] = code[index];	
+									}	
+								}
+								// TODO Parse macros
 							}	
-							alert(code);
+							return code; // Parsing complete 
+						}
+						this.isspecialtoken = function(token,check)
+						{
+							// TODO
+							if(token == check)
+							{
+								return true;	
+							}	
+							return false;
+						}
+						this.multiargparans = function(code)
+						{
+							for(index = 0;index<code.length;index++)
+							{
+								if(code[index] == "(")
+								{
+									if(parseNum(code[index]) === false)
+									{
+										code[index] = "<multiarg>";
+										code = code.slice(0,index).concat(this.multiargparans(code.slice(index,code.length)));
+										for(var index_2 = 0;index_2<code.length;index_2++)
+										{
+											if(code[index_2] == ")")
+											{
+												code[index_2] = "<endmultiarg>";	
+											}
+										}
+									}
+								}	
+							}
+							return code;	
 						}
 						this.tokenize = function(input) {
 							var tokens = [];
@@ -357,6 +598,76 @@
 							this.primitives[this.primitives.length] = [funcnames,fn,fnarity]; 
 							console.log([funcnames,fn,fnarity]);
 						};
+						this.langalt = function(funcname,name,lang)
+						{
+								// Append to any kind of array
+						};
+						this.procedures = [];
+						this.define_procedure = function(prname,inputs,body)
+						{
+							 // Append to this.procedures
+							 this.procedures[this.procedures.length] = [prname,inputs,body];
+						}
+						this.isproc_orfunc = function(fname)
+						{
+							for(var index = 0;index<this.primitives.length;index++)
+							{
+								for(var index_2 = 0;index_2<this.primitives[index][0].length;index_2++)
+								{
+									if(this.primitives[index][0][index_2] == fname)
+									{
+										return true;	
+									}	
+								}	
+							}	
+							for(var index = 0;index<this.procedures.length;index++)
+							{
+								if(this.procedures[index][0] == fname)
+								{
+									return true;	
+								}	
+							}
+							return false;
+						}
+						this.getfuncorprocarity = function(fname)
+						{
+							for(var index = 0;index<this.primitives.length;index++)
+							{
+								for(var index_2 = 0;index_2<this.primitives[index][0].length;index_2++)
+								{
+									if(this.primitives[index][0][index_2] == fname)
+									{
+										if(this.primitives[index][2] == -1)
+										{
+											return this.primitives[index][1].length;
+										}
+										return this.primitives[index][2];	
+									}	
+								}	
+							}	
+							for(var index = 0;index<this.procedures.length;index++)
+							{
+								if(this.procedures[index][0] == fname)
+								{
+									return this.procedures[index][1].length;	
+								}	
+							}
+							return undefined;
+						}
+						this.is_function = function(funcname)
+						{
+							for(var index = 0;index<this.primitives.length;index++)
+							{
+								for(var index_2 = 0;index_2<this.primitives[0].length;index_2++)
+								{
+									if(this.primitives[0][index_2] == funcname)
+									{
+										return true;	
+									}	
+								}
+							}
+							return false;	
+						};
 						this.parseinfix = function(array)
 						{
 							array.reverse;
@@ -473,6 +784,7 @@
 							if(operator ==  "(" ){return 2;}
 							if(operator ==  ")" ){return 1;}
 						}
+						
 						this.translate = function(lang,engname,gername)
 						{
 							
@@ -579,7 +891,7 @@
 						{
 							if(ltype(arguments[argc]) == "list")
 							{
-								// TODO Throw an error => list can't be sentenced
+								// TODO Sentence the list
 								
 							}
 							sentence = sentence + arguments[argc] + " ";
@@ -600,7 +912,8 @@
 						var list = b;
 						var extra = a;
 						if(list == extra){
-							// TODO Zirkuläre Liste
+							// TODO Zirkuläre Liste (warining / error)
+							
 						}
 						list.push(extra);
 						return list;
@@ -958,6 +1271,21 @@
 							result *= number;
 						}
 						return number;
+					},-1);
+					
+					globaltable.define(["quotient"],function(a,b){
+						var num1 = parseNum(arguments[0]);
+						var num2 = parseNum(arguments[1]);
+						if(num1 === false || num2 === false)
+						{
+							// TODO Throw an error	
+						}
+						if(arguments.length != 2)
+						{
+							// Check for 
+						}
+						
+						return num1/num2;
 					},-1);
 					
 					globaltable.define(["modulo"],function(a,b){
