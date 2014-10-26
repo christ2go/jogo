@@ -137,12 +137,17 @@
 						this.runit = function(code,scope)
 						{
 							//alert(">>",code);
+							if(code.length == 1)
+							{
+								console.log("The result is",code[0]);
+								return;	
+							}
 							if(!code)
 							{
 								alert("Code is missing");	
 							}
 							// 1 st to
-							var callarray = [] 
+							var callarray = []; 
 							for(var index = code.length-1;index >= 0;index --)
 							{
 									console.log(index);
@@ -150,17 +155,65 @@
 									{
 										callarray.unshift(code[index]);	
 									}else{
-										// Found a function call => evaluate
-										callarray.splice(this.getfuncorprocarity(code[index])	);
-										callarray.unshift(code[index]);
-										console.log(callarray);
-										alert(">>",callarray);
-										// TODO replace variables
-										// Lets really EVALUATE this
-										return;
+										// Get callarray
+										callarray.unshift(code[index]); // Add funcname to array
+										callarray = callarray.splice(0,this.getfuncorprocarity(code[index])+1);
+										console.log("Going to call "+callarray);
+										var result = this.exec(callarray); // Executed code stored in array
+										console.log("The result was: "+result );
+										// Change
+										console.log(code);
+										var newcode = [];
+										for(var i = 0;i < code.length;i ++)
+										{
+											if(i>index && i<=index+callarray.length)
+											{
+											}else if(i == index){
+												newcode[newcode.length] = result;	
+											}
+											else
+												{
+												newcode[newcode.length] = code[i];	
+											}
+										}
+										
+										
+										console.log(newcode);
+										// Generated call array correctly
+										// Don't do more :-)
+										return this.runit(newcode);
+										//return;
 									}
 							}
 						};
+						this.exec = function(call,scope)
+						{
+							// Needs scope only for functions like make and localmake, which modify variables
+							// TODO 
+							// Find the function (if exists, else eval in new env or if macro eval in old env)
+							//this.primitives[this.primitives.length] = [funcnames,fn,fnarity];
+							
+							for(var index = 1;index<call.length;index++)
+							{
+								if(call[index][0] == "\"")
+								{
+									call[index] = call[index].substr(1);	
+								}	
+							}
+							alert(call);
+							// TODO Lowercase
+							for(var index = 0;index<this.primitives.length;index++)
+							{
+								for(var index_2 = 0;index_2<this.primitives[index][0].length;index_2++)
+								{
+									if(this.primitives[index][0][index_2] == call[0])
+									{
+										call.shift();
+										return(this.primitives[index][1].apply(null,call));
+									}
+								}	
+							}
+						}
 						this.get_next_eval = function(code)
 						{
 							//alert(code);
@@ -1256,9 +1309,10 @@
 					// TODO Type checking in product
 					globaltable.define(["product"],function(a,b){
 						var result = parseNum(arguments[0]);
-						if(arguments.length != 2)
+						
+						if(arguments.length == 2)
 						{
-							// TODO 
+							return a*b;
 						}
 						for(var index = 1;index<arguments.length;index++)
 						{
