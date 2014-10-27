@@ -142,6 +142,7 @@
 								console.log("The result is",code[0]);
 								return;	
 							}
+							console.log("Recieved code:",code);
 							if(!code)
 							{
 								alert("Code is missing");	
@@ -156,6 +157,15 @@
 										callarray.unshift(code[index]);	
 									}else{
 										// Get callarray
+										// Check for multiarg
+										var multiarg = false;
+										if(code[index-1] == "<multiarg>")
+										{
+											alert("Could this be mutiarg?");
+											multiarg = true;	
+										}else{
+											console.log("No multiarg:"+code[index]);	
+										}
 										callarray.unshift(code[index]); // Add funcname to array
 										callarray = callarray.splice(0,this.getfuncorprocarity(code[index])+1);
 										console.log("Going to call "+callarray);
@@ -223,12 +233,18 @@
 								if(this.isproc_orfunc(code[index]))
 								{
 										var callarrray = [];
-										callarrray[0] = code[index];
+										var multiarg = false;
+										if(code[index-1] == "<multiarg>")
+										{
+											multiarg = true;	
+											callarrray[callarrray.length] = "<multiarg>";
+										} 
+										callarrray[callarrray.length] = code[index];
 										//console.log("is a function");
 										// Get the funcs arity and append, then return
 										var funcarity = this.getfuncorprocarity(code[index]);
 										//alert("ARITY:"+funcarity);
-										for(var i = 0;i<funcarity;i++)
+										for(var i = 0;i<funcarity || multiarg;i++)
 										{
 											index++;
 											console.log(code[index]);
@@ -239,6 +255,7 @@
 												funcarity += this.getfuncorprocarity(code[index]);
 												funcarity--;
 												i--;
+												
 
 											}else{
 												if(code[index] === undefined)
@@ -246,6 +263,15 @@
 													// Missing token for function call
 													console.log("Missing argument for function "+callarrray[0]);
 													// TODO Throw an error	
+												}
+												if(multiarg && code[index] != "<endmultiarg>")
+												{
+												}
+												if(multiarg && code[index] == "<endmultiarg>")
+												{
+													callarrray[callarrray.length] = code[index];
+													
+													return [index,callarrray];
 												}
 												callarrray[callarrray.length] = code[index];	
 											}	
