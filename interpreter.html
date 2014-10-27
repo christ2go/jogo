@@ -200,7 +200,7 @@
 									call[index] = call[index].substr(1);	
 								}	
 							}
-							alert(call);
+							//alert(call);
 							// TODO Lowercase
 							for(var index = 0;index<this.primitives.length;index++)
 							{
@@ -1285,7 +1285,7 @@
 							}
 							result += number;
 						}
-						return number;
+						return result;
 					},-1);
 					
 					globaltable.define(["difference"],function(a,b){
@@ -1309,7 +1309,10 @@
 					// TODO Type checking in product
 					globaltable.define(["product"],function(a,b){
 						var result = parseNum(arguments[0]);
-						
+						if(!a && !b)
+						{
+							return 1;
+						}
 						if(arguments.length == 2)
 						{
 							return a*b;
@@ -1324,7 +1327,7 @@
 							}
 							result *= number;
 						}
-						return number;
+						return result;
 					},-1);
 					
 					globaltable.define(["quotient"],function(a,b){
