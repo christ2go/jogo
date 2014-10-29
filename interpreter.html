@@ -167,7 +167,12 @@
 											console.log("No multiarg:"+code[index]);	
 										}
 										callarray.unshift(code[index]); // Add funcname to array
-										callarray = callarray.splice(0,this.getfuncorprocarity(code[index])+1);
+										if(!multiarg)
+										{
+											callarray = callarray.splice(0,this.getfuncorprocarity(code[index])+1);
+										}else{
+											callarray.splice(-1,1);	
+										}
 										console.log("Going to call "+callarray);
 										var result = this.exec(callarray); // Executed code stored in array
 										console.log("The result was: "+result );
@@ -178,7 +183,11 @@
 										{
 											if(i>index && i<=index+callarray.length)
 											{
-											}else if(i == index){
+											}
+											else if(multiarg && i == index-1 || multiarg && i+1 == index )
+											{
+											}
+											else if(i == index){
 												newcode[newcode.length] = result;	
 											}
 											else
@@ -191,8 +200,8 @@
 										console.log(newcode);
 										// Generated call array correctly
 										// Don't do more :-)
-										return this.runit(newcode);
-										//return;
+										//return this.runit(newcode);
+										return;
 									}
 							}
 						};
@@ -234,6 +243,7 @@
 								{
 										var callarrray = [];
 										var multiarg = false;
+										var multivar = 0;
 										if(code[index-1] == "<multiarg>")
 										{
 											multiarg = true;	
@@ -246,10 +256,17 @@
 										//alert("ARITY:"+funcarity);
 										for(var i = 0;i<funcarity || multiarg;i++)
 										{
+											
 											index++;
 											console.log(code[index]);
 											if(this.isproc_orfunc(code[index]))
 											{
+												if(code[index-1] == "<multiarg>")
+												{
+													multiarg = true;
+													multivar++;	
+													//callarrray[callarrray.length] = "<multiarg>";
+												} 
 												//console.log("NEW CALL:");
 												callarrray[callarrray.length] = code[index];
 												funcarity += this.getfuncorprocarity(code[index]);
@@ -267,11 +284,15 @@
 												if(multiarg && code[index] != "<endmultiarg>")
 												{
 												}
-												if(multiarg && code[index] == "<endmultiarg>")
+												if(multiarg && code[index] == "<endmultiarg>" && multivar == 0)
 												{
 													callarrray[callarrray.length] = code[index];
 													
 													return [index,callarrray];
+												}
+												if(multiarg && code[index] == "<endmultiarg>" && multivar != 0)
+												{
+													multivar--;
 												}
 												callarrray[callarrray.length] = code[index];	
 											}	
