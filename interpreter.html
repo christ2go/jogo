@@ -151,7 +151,7 @@
 							var callarray = []; 
 							for(var index = code.length-1;index >= 0;index --)
 							{
-									console.log(index);
+									console.log(code[index]);
 									if(!this.isproc_orfunc(code[index]))
 									{
 										callarray.unshift(code[index]);	
@@ -159,19 +159,35 @@
 										// Get callarray
 										// Check for multiarg
 										var multiarg = false;
+										//alert(code[index-1]);
 										if(code[index-1] == "<multiarg>")
 										{
-											alert("Could this be mutiarg?");
+											console.log("Could this be mutiarg?");
 											multiarg = true;	
 										}else{
 											console.log("No multiarg:"+code[index]);	
 										}
+										console.log(multiarg);
 										callarray.unshift(code[index]); // Add funcname to array
-										if(!multiarg)
+										if(multiarg == false)
 										{
 											callarray = callarray.splice(0,this.getfuncorprocarity(code[index])+1);
-										}else{
-											callarray.splice(-1,1);	
+										}
+										else
+										{
+											alert(callarray);
+											if(callarray.indexOf("<endmultiarg>") == callarray.length-1)
+											{	
+												callarray.pop();
+												
+											}else
+											{
+											//allarray.splice(-1,1);
+
+											callarray.splice(callarray.indexOf("<endmultiarg>"));
+											// Lets also remove it from "newcode"
+											code.splice(callarray.length+index-1,1);
+											}
 										}
 										console.log("Going to call "+callarray);
 										var result = this.exec(callarray); // Executed code stored in array
@@ -197,10 +213,10 @@
 										}
 										
 										
-										console.log(newcode);
+										//console.log(newcode);
 										// Generated call array correctly
 										// Don't do more :-)
-										//return this.runit(newcode);
+										return this.runit(newcode);
 										return;
 									}
 							}
