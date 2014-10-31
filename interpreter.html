@@ -260,6 +260,7 @@
 										var callarrray = [];
 										var multiarg = false;
 										var multivar = 0;
+										/*
 										if(code[index-1] == "<multiarg>")
 										{
 											multiarg = true;	
@@ -268,53 +269,38 @@
 										callarrray[callarrray.length] = code[index];
 										//console.log("is a function");
 										// Get the funcs arity and append, then return
-										var funcarity = this.getfuncorprocarity(code[index]);
+										*/
+										var funcarity = 0;
 										//alert("ARITY:"+funcarity);
-										for(var i = 0;i<funcarity || multiarg;i++)
+										var multivar = 0;
+										
+										for(var index=0;index<=funcarity;index++)
 										{
-											
-											index++;
-											console.log(code[index]);
-											if(this.isproc_orfunc(code[index]))
+											if(index == code.length)
 											{
-												if(code[index-1] == "<multiarg>")
-												{
-													multiarg = true;
-													multivar++;	
-													//callarrray[callarrray.length] = "<multiarg>";
-												} 
-												//console.log("NEW CALL:");
-												callarrray[callarrray.length] = code[index];
-												funcarity += this.getfuncorprocarity(code[index]);
-												funcarity--;
-												i--;
-												
-
-											}else{
-												if(code[index] === undefined)
-												{
-													// Missing token for function call
-													console.log("Missing argument for function "+callarrray[0]);
-													// TODO Throw an error	
-												}
-												if(multiarg && code[index] != "<endmultiarg>")
-												{
-												}
-												if(multiarg && code[index] == "<endmultiarg>" && multivar == 0)
-												{
-													callarrray[callarrray.length] = code[index];
-													
-													return [index,callarrray];
-												}
-												if(multiarg && code[index] == "<endmultiarg>" && multivar != 0)
-												{
-													multivar--;
-												}
-												callarrray[callarrray.length] = code[index];	
-											}	
+												return [index,callarrray];
+											}
+											if(code[index] == "<multiarg>")
+											{
+												multivar++;	
+											}
+											if(multivar != 0)
+											{
+													funcarity++;
+											}
+										if(code[index] == "<endmultiarg>")
+										{
+											multivar --;
 										}
+										if(this.isproc_orfunc(code[index]))
+										{
+											funcarity += this.getfuncorprocarity(code[index]);
+										}
+										callarrray[callarrray.length] = code[index];
+													
+								}
 										// MAYBE SPLICE CODE HERE --> no longer needed ?!
-										return [index,callarrray];
+									return [index,callarrray];
 								}	
 							}	
 						}
@@ -1634,7 +1620,52 @@
 					});
 					
 					// MISSING rerandom
+					// MISSING form
+					globaltable.define(["form"],function(num,nwidth,precision{
+						
+						});
 					
+					// MISSING bitand,bitor,bitxor,bitnot,ashift,lshift
+					
+					globaltable.define(["and"],function(){
+						var args = arguments;
+						for(var index = 0;index<args.length;index++)
+						{
+							if(args[index] != "true") // TODO Type converting
+							{
+								return false;	
+							}	
+						}
+						return true;
+						},-1);
+					
+					globaltable.define(,function(["or"]){
+						var args = arguments;
+						for(var index = 0;index < args.length;index++)
+						{
+							if(args[index] == "true")
+							{
+								return true;	
+							}	
+						}
+						return false;
+					},-1);
+					
+					globaltable.define(["not"],function(tfexpr){
+						if(tfexpr == "true")
+						{
+							return false;	
+						}	
+						
+						if(tfexpr == false)
+						{
+							return true;	
+						}
+					});
+					
+					/* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
+					 * GET ACCESS TO VARIABLES
+					 */
 				</script>
 
 			</div>
