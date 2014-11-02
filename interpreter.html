@@ -32,44 +32,55 @@
 				<!-- INTERPRETER GOES HERE -->
 				<script>
 					// Scoping model
-					function scopeobj(globscope,oldscope)
+					function scopeobj(oldscope)
 					{
-						this.globscope = globscope;
-						this.vars = []; // Local container
-						// The scope handler function
-						if(!oldscope)
+						this.vars = []
+						if(!oldsacope)
 						{
-							// This is root scope
-							this.oldscope = [];	
-						}else{
-							this.oldscope[this.oldscope.length] = oldscope; // Append as last element => searching	
+							
+							this.sid = 0; 
 						}
-						this.setlocal = function(elname,value)
+						this.getscopeid = function()
 						{
-							// Check if exists // TODO In global scopes
-							for(var i = 0;i<this.vars.length;i++)
+							
+							
+						}
+						this.set = function(var,val)
+						{
+							// Check if already set
+							for(var index = 0;index<this.vars.length;index++)
 							{
-									var element = this.vars[i];
-									if(element[0] == elname)
-									{
-										// Change it
-										this.vars[1][1] = value;
-										return;
-									}
+								if(this.vars[index][1] == var)
+								{
+									this.vars[index][2] = val;
+									
+								}
 							}
-							// Append
-							this.vars[this.vars.length] = [elname,value];
-							
-						};
-						this.setglobal = function(varname,value)
-						{
-								// Get up to the first apperance
-								
 						}
-						this.get = function(varname)
+						
+						this.get = function(var)
 						{
 							
-						};
+							// Returns undefined if variable isn't found
+							for(var index = 0;index<this.vars.length;index++)
+							{
+								if(this.vars[index][1] == var)
+								{
+									return this.vars[index][2];
+									
+								}
+							}
+						}
+						
+						this.setlocal = function(var,val)
+						{
+							
+							
+						}
+						
+						
+						
+						
 					}
 					// Handling for tab in textarea
 					$("textarea").keydown(function(e) {
