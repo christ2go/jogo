@@ -27,61 +27,29 @@
 			<nav></nav>
 
 			<div>
-				<textarea id="mycode" height=400 width=50></textarea><br />
+				<textarea id="mycode"></textarea><br />
 				<button type="submit" id="codesubmit">Absenden</button>
 				<!-- INTERPRETER GOES HERE -->
 				<script>
 					// Scoping model
-					function scopeobj(oldscope)
+					function scopeobj(globscope,oldscope)
 					{
-						this.vars = []
-						if(!oldsacope)
+						
+						this.vars = [];
+						
+						this.set = function(varname,expr)
 						{
-							
-							this.sid = 0; 
-						}
-						this.getscopeid = function()
+							this.vars[varname] = expr;
+						};
+						
+						this.get = function(varname)
 						{
-							
-							
-						}
-						this.set = function(var,val)
-						{
-							// Check if already set
-							for(var index = 0;index<this.vars.length;index++)
-							{
-								if(this.vars[index][1] == var)
-								{
-									this.vars[index][2] = val;
-									
-								}
-							}
+						
+							return this.vars[varname];
 						}
 						
-						this.get = function(var)
-						{
-							
-							// Returns undefined if variable isn't found
-							for(var index = 0;index<this.vars.length;index++)
-							{
-								if(this.vars[index][1] == var)
-								{
-									return this.vars[index][2];
-									
-								}
-							}
-						}
+					};
 						
-						this.setlocal = function(var,val)
-						{
-							
-							
-						}
-						
-						
-						
-						
-					}
 					// Handling for tab in textarea
 					$("textarea").keydown(function(e) {
 					    if(e.keyCode === 9) { // tab was pressed
@@ -133,6 +101,7 @@
 							alert(code);
 							*/
 						}
+						this.globalscope = new scopeobj([]);
 						this.run = function(code,scope)
 						{
 								if(!scope)
@@ -351,15 +320,15 @@
 								alert("Klammer Fehler");
 								return;	
 							}
+							alert(code);
 							
-							
-							code = this.multiargparans(code);
 							// Booleans CAN ONLY be parsed correctly at execution time
 							
 							for(var index = 0; index<code.length;index++)
 							{
 								var element = code[index];
 								// Check if element is a number and element+1 is an operator
+								alert(!parseNum(element) === false || element == "MINUS" || element == "(" || element == ")");
 								if(!parseNum(element) === false || element == "MINUS" || element == "(" || element == ")")
 								{
 									// Found a number	or operator => look for end
@@ -368,7 +337,7 @@
 									var parans = 0;
 									var isnum;
 									var startindex = index;
-									while((parseNum(code[myindex]) != false || is_operator(code[myindex]) || code[myindex] == "MINUS" || code[myindex] == "(" || code[myindex] == ")") || parans != 0)
+									while((parseNum(code[myindex]) != false) || (is_operator(code[myindex])) || code[myindex] == "MINUS" || code[myindex] == "(" || code[myindex] == ")" || parans != 0)
 									{
 										var old_isnum = isnum;
 										if(parseNum(code[myindex]) != false)
@@ -392,15 +361,16 @@
 										}
 										tokens[tokens.length] = code[myindex];	
 										myindex++;
-										console.log(tokens);
+										console.log("INFIXED"+tokens);
 									}
 									old_index = startindex;
 									
 									index = myindex;
 									tokens = this.parseinfix(tokens);
+									alert(tokens);
 									code.splice.apply(code, [old_index, myindex-old_index].concat(tokens));
 								}	
-								
+
 								for(var index=0;index<code.length;index++)
 								{
 									if(code[index] == "-"){code[index] = "difference";}
@@ -411,6 +381,9 @@
 								// ALL Parsing has to be done here
 								
 								// Parse and define procedures
+							}
+								code = this.multiargparans(code);
+								// TODO Parse macros
 								var inproc = false;
 								var vararg = true;
 								var procdef = [[],[],[]];
@@ -443,8 +416,7 @@
 									{
 										procdef[2][procdef[2].length] = code[index];	
 									}	
-								}
-								// TODO Parse macros
+
 							}	
 							return code; // Parsing complete 
 						}
@@ -1632,7 +1604,7 @@
 					
 					// MISSING rerandom
 					// MISSING form
-					globaltable.define(["form"],function(num,nwidth,precision{
+					globaltable.define(["form"],function(num,nwidth,precision){
 						
 						});
 					
@@ -1650,7 +1622,7 @@
 						return true;
 						},-1);
 					
-					globaltable.define(,function(["or"]){
+					globaltable.define(["or"],function(){
 						var args = arguments;
 						for(var index = 0;index < args.length;index++)
 						{
@@ -1674,9 +1646,15 @@
 						}
 					});
 					
+					
+					
 					/* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
 					 * GET ACCESS TO VARIABLES
 					 */
+					 
+					globaltable.define(["make"],function(varname,expr){
+						alert("Making "+varname+" => "+expr);
+					});
 				</script>
 
 			</div>
