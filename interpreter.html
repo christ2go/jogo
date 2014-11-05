@@ -179,7 +179,7 @@
 										{
 											if(i>index && i<=index+callarray.length)
 											{
-											}
+											} 
 											else if(multiarg && i == index-1 || multiarg && i+1 == index )
 											{
 											}
@@ -197,7 +197,6 @@
 										// Generated call array correctly
 										// Don't do more :-)
 										return this.runit(newcode);
-										return;
 									}
 							}
 						};
@@ -224,6 +223,10 @@
 									if(this.primitives[index][0][index_2] == call[0])
 									{
 										call.shift();
+										if(this.primitives[index][3] == true)
+										{
+											alert("SCOPING FUNCTION");	
+										}
 										return(this.primitives[index][1].apply(null,call));
 									}
 								}	
@@ -671,16 +674,20 @@
 							return [string, index];
 						};
 						this.primitives = [];
-						this.define = function(funcnames,fn,fnarity)
+						this.define = function(funcnames,fn,fnarity,scope)
 						{
 							// Function for defining functions
+							if(!scope)
+							{
+								scope = false;	
+							}
 							if(!fnarity)
 							{
 								fnarity = fn.length; 
 							}
 							// TODO Check if funcname is already used
 							
-							this.primitives[this.primitives.length] = [funcnames,fn,fnarity]; 
+							this.primitives[this.primitives.length] = [funcnames,fn,fnarity,scope]; 
 							console.log([funcnames,fn,fnarity]);
 						};
 						this.langalt = function(funcname,name,lang)
@@ -1646,15 +1653,16 @@
 						}
 					});
 					
+					globaltable.define(["make"],function(varname,expr,scope){
+						
+					},2,true);
 					
 					
 					/* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
 					 * GET ACCESS TO VARIABLES
 					 */
 					 
-					globaltable.define(["make"],function(varname,expr){
-						alert("Making "+varname+" => "+expr);
-					});
+					
 				</script>
 
 			</div>
