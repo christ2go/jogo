@@ -1,98 +1,97 @@
 <!DOCTYPE html>
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
+    <head>
+        <meta charset="utf-8">
 
-		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
-		Remove this if you use the .htaccess -->
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+Remove this if you use the .htaccess -->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-		<title>interpreter</title>
-		<meta name="description" content="">
-		<meta name="author" content="">
+        <title>interpreter</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
 
-		<meta name="viewport" content="width=device-width; initial-scale=1.0">
-		 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.1.min.js"></script>
-		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
-		<link rel="shortcut icon" href="/favicon.ico">
-		<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-	</head>
+        <meta name="viewport" content="width=device-width; initial-scale=1.0">
+        <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.1.min.js"></script>
+        <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+        <link rel="shortcut icon" href="/favicon.ico">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    </head>
 
-	<body>
-		<div>
-			<header>
-				<h1>Logo Interpreter</h1>
-			</header>
-			<nav></nav>
+    <body>
+        <div>
+            <header>
+                <h1>Logo Interpreter</h1>
+            </header>
+            <nav></nav>
 
-			<div>
-				<textarea id="mycode"></textarea><br />
-				<button type="submit" id="codesubmit">Absenden</button>
-				<!-- INTERPRETER GOES HERE -->
-				<script>
-					// Scoping model
-					function scopeobj(globscope,oldscope)
-					{
-						
-						this.vars = [];
-						
-						this.set = function(varname,expr)
-						{
-							this.vars[varname] = expr;
-						};
-						
-						this.get = function(varname)
-						{
-						
-							return this.vars[varname];
-						}
-						
-					};
-						
-					// Handling for tab in textarea
-					$("textarea").keydown(function(e) {
-					    if(e.keyCode === 9) { // tab was pressed
-					        // get caret position/selection
-					        var start = this.selectionStart;
-					        var end = this.selectionEnd;
-					
-					        var $this = $(this);
-					        var value = $this.val();
-					
-					        // set textarea value to: text before caret + tab + text after caret
-					        $this.val(value.substring(0, start)
-					                    + "\t"
-					                    + value.substring(end));
-					
-					        // put caret at right position again (add one for the tab)
-					        this.selectionStart = this.selectionEnd = start + 1;
-									
-					        // prevent the focus lose
-					        e.preventDefault();
-					    }
-					});
-					
-					test = new logointerpreter();
-					
-					$("#codesubmit").click(function(){
-							var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm," ").replace("\t"," ");
-							console.log(test.evaluate(code));
-							//console.log((test.parseinfix(me)));
-					});
-					function logointerpreter() {
-						var self = this;
-						// 1st Parse the String
-						// "fd 100" => ["fd",100]
-						// TODO Remove comments frome logo code
-						
-						this.evaluate = function(code)
-						{
-							// Main Interpreter function, used for evaluating the code
-							var code = this.parse_code(code);
-							alert(code);
-							this.run(code);
-							/*
+            <div>
+                <textarea id="mycode"></textarea><br />
+                <button type="submit" id="codesubmit">Absenden</button>
+                <!-- INTERPRETER GOES HERE -->
+                <script>
+                    // Scoping model
+                    function scopeobj(globscope,oldscope)
+                    {
+
+                        this.vars = [];
+
+                        this.set = function(varname,expr)
+                        {
+                            this.vars[varname] = expr;
+                        };
+
+                        this.get = function(varname)
+                        {
+                            return this.vars[varname];
+                        }
+
+                    };
+
+                    // Handling for tab in textarea
+                    $("textarea").keydown(function(e) {
+                        if(e.keyCode === 9) { // tab was pressed
+                            // get caret position/selection
+                            var start = this.selectionStart;
+                            var end = this.selectionEnd;
+
+                            var $this = $(this);
+                            var value = $this.val();
+
+                            // set textarea value to: text before caret + tab + text after caret
+                            $this.val(value.substring(0, start)
+                                      + "\t"
+                                      + value.substring(end));
+
+                            // put caret at right position again (add one for the tab)
+                            this.selectionStart = this.selectionEnd = start + 1;
+
+                            // prevent the focus lose
+                            e.preventDefault();
+                        }
+                    });
+
+                    test = new logointerpreter();
+
+                    $("#codesubmit").click(function(){
+                        var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm," ").replace("\t"," ");
+                        console.log(test.evaluate(code));
+                        //console.log((test.parseinfix(me)));
+                    });
+                    function logointerpreter() {
+                        var self = this;
+                        // 1st Parse the String
+                        // "fd 100" => ["fd",100]
+                        // TODO Remove comments frome logo code
+
+                        this.evaluate = function(code)
+                        {
+                            // Main Interpreter function, used for evaluating the code
+                            var code = this.parse_code(code);
+                            alert(code);
+                            this.run(code);
+                            /*
 							var teste;
 							teste = this.get_next_eval(code);
 							console.log(teste);
@@ -100,150 +99,150 @@
 							code = code.slice(teste[1].length,code.length);
 							alert(code);
 							*/
-						}
-						this.globalscope = new scopeobj([]);
-						this.run = function(code,scope)
-						{
-								if(!scope)
-								{
-									scope = new scopeobj([]);
-								}
-								// Get next func call
-								var run = this.get_next_eval(code);
-								console.log("RUNNABEL",run);
-								this.runit(run[1],scope);
-								
-						};
-						this.runit = function(code,scope)
-						{
-							//alert(">>",code);
-							if(code.length == 1)
-							{
-								console.log("The result is",code[0]);
-								return;	
-							}
-							console.log("Recieved code:",code);
-							if(!code)
-							{
-								alert("Code is missing");	
-							}
-							// 1 st to
-							var callarray = []; 
-							for(var index = code.length-1;index >= 0;index --)
-							{
-									console.log(code[index]);
-									if(!this.isproc_orfunc(code[index]))
-									{
-										callarray.unshift(code[index]);	
-									}else{
-										// Get callarray
-										// Check for multiarg
-										var multiarg = false;
-										//alert(code[index-1]);
-										if(code[index-1] == "<multiarg>")
-										{
-											console.log("Could this be mutiarg?");
-											multiarg = true;	
-										}else{
-											console.log("No multiarg:"+code[index]);	
-										}
-										console.log(multiarg);
-										callarray.unshift(code[index]); // Add funcname to array
-										if(multiarg == false)
-										{
-											callarray = callarray.splice(0,this.getfuncorprocarity(code[index])+1);
-										}
-										else
-										{
-											alert(callarray);
-											if(callarray.indexOf("<endmultiarg>") == callarray.length-1)
-											{	
-												callarray.pop();
-												
-											}else
-											{
-											//allarray.splice(-1,1);
+                        }
+                        this.globalscope = new scopeobj([]);
+                        this.run = function(code,scope)
+                        {
+                            if(!scope)
+                            {
+                                scope = new scopeobj([]);
+                            }
+                            // Get next func call
+                            var run = this.get_next_eval(code);
+                            console.log("RUNNABEL",run);
+                            this.runit(run[1],scope);
 
-											callarray.splice(callarray.indexOf("<endmultiarg>"));
-											// Lets also remove it from "newcode"
-											code.splice(callarray.length+index-1,1);
-											}
-										}
-										console.log("Going to call "+callarray);
-										var result = this.exec(callarray); // Executed code stored in array
-										console.log("The result was: "+result );
-										// Change
-										console.log(code);
-										var newcode = [];
-										for(var i = 0;i < code.length;i ++)
-										{
-											if(i>index && i<=index+callarray.length)
-											{
-											} 
-											else if(multiarg && i == index-1 || multiarg && i+1 == index )
-											{
-											}
-											else if(i == index){
-												newcode[newcode.length] = result;	
-											}
-											else
-												{
-												newcode[newcode.length] = code[i];	
-											}
-										}
-										
-										
-										//console.log(newcode);
-										// Generated call array correctly
-										// Don't do more :-)
-										return this.runit(newcode);
-									}
-							}
-						};
-						this.exec = function(call,scope)
-						{
-							// Needs scope only for functions like make and localmake, which modify variables
-							// TODO 
-							// Find the function (if exists, else eval in new env or if macro eval in old env)
-							//this.primitives[this.primitives.length] = [funcnames,fn,fnarity];
-							
-							for(var index = 1;index<call.length;index++)
-							{
-								if(call[index][0] == "\"")
-								{
-									call[index] = call[index].substr(1);	
-								}	
-							}
-							//alert(call);
-							// TODO Lowercase
-							for(var index = 0;index<this.primitives.length;index++)
-							{
-								for(var index_2 = 0;index_2<this.primitives[index][0].length;index_2++)
-								{
-									if(this.primitives[index][0][index_2] == call[0])
-									{
-										call.shift();
-										if(this.primitives[index][3] == true)
-										{
-											alert("SCOPING FUNCTION");	
-										}
-										return(this.primitives[index][1].apply(null,call));
-									}
-								}	
-							}
-						}
-						this.get_next_eval = function(code)
-						{
-							//alert(code);
-							for(var index = 0;index<code.length;index++)
-							{
-								// Check for procedure definition
-								if(this.isproc_orfunc(code[index]))
-								{
-										var callarrray = [];
-										var multiarg = false;
-										var multivar = 0;
-										/*
+                        };
+                        this.runit = function(code,scope)
+                        {
+                            //alert(">>",code);
+                            if(code.length == 1)
+                            {
+                                console.log("The result is",code[0]);
+                                return;	
+                            }
+                            console.log("Recieved code:",code);
+                            if(!code)
+                            {
+                                alert("Code is missing");	
+                            }
+                            // 1 st to
+                            var callarray = []; 
+                            for(var index = code.length-1;index >= 0;index --)
+                            {
+                                console.log(code[index]);
+                                if(!this.isproc_orfunc(code[index]))
+                                {
+                                    callarray.unshift(code[index]);	
+                                }else{
+                                    // Get callarray
+                                    // Check for multiarg
+                                    var multiarg = false;
+                                    //alert(code[index-1]);
+                                    if(code[index-1] == "<multiarg>")
+                                    {
+                                        console.log("Could this be mutiarg?");
+                                        multiarg = true;	
+                                    }else{
+                                        console.log("No multiarg:"+code[index]);	
+                                    }
+                                    console.log(multiarg);
+                                    callarray.unshift(code[index]); // Add funcname to array
+                                    if(multiarg == false)
+                                    {
+                                        callarray = callarray.splice(0,this.getfuncorprocarity(code[index])+1);
+                                    }
+                                    else
+                                    {
+                                        alert(callarray);
+                                        if(callarray.indexOf("<endmultiarg>") == callarray.length-1)
+                                        {	
+                                            callarray.pop();
+
+                                        }else
+                                        {
+                                            //allarray.splice(-1,1);
+
+                                            callarray.splice(callarray.indexOf("<endmultiarg>"));
+                                            // Lets also remove it from "newcode"
+                                            code.splice(callarray.length+index-1,1);
+                                        }
+                                    }
+                                    console.log("Going to call "+callarray);
+                                    var result = this.exec(callarray); // Executed code stored in array
+                                    console.log("The result was: "+result );
+                                    // Change
+                                    console.log(code);
+                                    var newcode = [];
+                                    for(var i = 0;i < code.length;i ++)
+                                    {
+                                        if(i>index && i<=index+callarray.length)
+                                        {
+                                        } 
+                                        else if(multiarg && i == index-1 || multiarg && i+1 == index )
+                                        {
+                                        }
+                                        else if(i == index){
+                                            newcode[newcode.length] = result;	
+                                        }
+                                        else
+                                        {
+                                            newcode[newcode.length] = code[i];	
+                                        }
+                                    }
+
+
+                                    //console.log(newcode);
+                                    // Generated call array correctly
+                                    // Don't do more :-)
+                                    return this.runit(newcode);
+                                }
+                            }
+                        };
+                        this.exec = function(call,scope)
+                        {
+                            // Needs scope only for functions like make and localmake, which modify variables
+                            // TODO 
+                            // Find the function (if exists, else eval in new env or if macro eval in old env)
+                            //this.primitives[this.primitives.length] = [funcnames,fn,fnarity];
+
+                            for(var index = 1;index<call.length;index++)
+                            {
+                                if(call[index][0] == "\"")
+                                {
+                                    call[index] = call[index].substr(1);	
+                                }	
+                            }
+                            //alert(call);
+                            // TODO Lowercase
+                            for(var index = 0;index<this.primitives.length;index++)
+                            {
+                                for(var index_2 = 0;index_2<this.primitives[index][0].length;index_2++)
+                                {
+                                    if(this.primitives[index][0][index_2] == call[0])
+                                    {
+                                        call.shift();
+                                        if(this.primitives[index][3] == true)
+                                        {
+                                            alert("SCOPING FUNCTION");	
+                                        }
+                                        return(this.primitives[index][1].apply(null,call));
+                                    }
+                                }	
+                            }
+                        }
+                        this.get_next_eval = function(code)
+                        {
+                            //alert(code);
+                            for(var index = 0;index<code.length;index++)
+                            {
+                                // Check for procedure definition
+                                if(this.isproc_orfunc(code[index]))
+                                {
+                                    var callarrray = [];
+                                    var multiarg = false;
+                                    var multivar = 0;
+                                    /*
 										if(code[index-1] == "<multiarg>")
 										{
 											multiarg = true;	
@@ -253,1422 +252,1390 @@
 										//console.log("is a function");
 										// Get the funcs arity and append, then return
 										*/
-										var funcarity = 0;
-										//alert("ARITY:"+funcarity);
-										var multivar = 0;
-										
-										for(var index=0;index<=funcarity;index++)
-										{
-											if(index == code.length)
-											{
-												return [index,callarrray];
-											}
-											if(code[index] == "<multiarg>")
-											{
-												multivar++;	
-											}
-											if(multivar != 0)
-											{
-													funcarity++;
-											}
-										if(code[index] == "<endmultiarg>")
-										{
-											multivar --;
-										}
-										if(this.isproc_orfunc(code[index]))
-										{
-											funcarity += this.getfuncorprocarity(code[index]);
-										}
-										callarrray[callarrray.length] = code[index];
-													
-								}
-										// MAYBE SPLICE CODE HERE --> no longer needed ?!
-									return [index,callarrray];
-								}	
-							}	
-						}
-						function clone(obj) {
-					    if(obj == null || typeof(obj) != 'object')
-					        return obj;
-					
-					    var temp = obj.constructor(); // changed
-					
-					    for(var key in obj) {
-					        if(obj.hasOwnProperty(key)) {
-					            temp[key] = clone(obj[key]);
-					        }
-					    }
-					    return temp;
-					}
-						this.parse_code = function(code)
-						{
-							// 1st Tokenize the Input
-							var code = this.tokenize(code);
-							var klammern = 0;
-							for(var index = 0;index<code.length;index++)
-							{
-								if(code[index] == "(")
-								{
-									klammern++;	
-								}
-								if(code[index] == ")")
-								{
-									klammern--;	
-								}	
-							}
-							
-							
-							if(klammern != 0)
-							{
-								alert("Klammer Fehler");
-								return;	
-							}
-							alert(code);
-							
-							// Booleans CAN ONLY be parsed correctly at execution time
-							
-							for(var index = 0; index<code.length;index++)
-							{
-								var element = code[index];
-								// Check if element is a number and element+1 is an operator
-								alert(!parseNum(element) === false || element == "MINUS" || element == "(" || element == ")");
-								if(!parseNum(element) === false || element == "MINUS" || element == "(" || element == ")")
-								{
-									// Found a number	or operator => look for end
-									var myindex = index;
-									var tokens = [];
-									var parans = 0;
-									var isnum;
-									var startindex = index;
-									while((parseNum(code[myindex]) != false) || (is_operator(code[myindex])) || code[myindex] == "MINUS" || code[myindex] == "(" || code[myindex] == ")" || parans != 0)
-									{
-										var old_isnum = isnum;
-										if(parseNum(code[myindex]) != false)
-										{
-											isnum = true;	
-										}else{
-											isnum = false;	
-										}
-										if(old_isnum == isnum)
-										{
-											tokens = [];	
-											startindex = myindex;
-										}
-										if(code[myindex] == "(")
-										{
-											parans++;
-										}
-										if(code[myindex] == ")")
-										{
-											parans--;
-										}
-										tokens[tokens.length] = code[myindex];	
-										myindex++;
-										console.log("INFIXED"+tokens);
-									}
-									old_index = startindex;
-									
-									index = myindex;
-									tokens = this.parseinfix(tokens);
-									alert(tokens);
-									code.splice.apply(code, [old_index, myindex-old_index].concat(tokens));
-								}	
+                                    var funcarity = 0;
+                                    //alert("ARITY:"+funcarity);
+                                    var multivar = 0;
 
-								for(var index=0;index<code.length;index++)
-								{
-									if(code[index] == "-"){code[index] = "difference";}
-									if(code[index] == "+"){code[index] = "sum";}
-									if(code[index] == "*"){code[index] = "product";}
-									if(code[index] == "/"){code[index] = "quotient";}  	
-								}
-								// ALL Parsing has to be done here
-								
-								// Parse and define procedures
-							}
-								code = this.multiargparans(code);
-								// TODO Parse macros
-								var inproc = false;
-								var vararg = true;
-								var procdef = [[],[],[]];
-								for(var index = 0;index<code.length;index++)
-								{
-									if(this.isspecialtoken(code[index],"to"))
-									{
-										
-										inproc = true;
-										procdef[0] = code[index+1];
-										index++;	
-									}	
-									else if(code[index][0] == ":" && ltype(code[index]) != "list" && vararg == true)
-									{
-										procdef[1][procdef[1].length] = code[index];
-									}else{
-										vararg = false;	
-									}
-									if(this.isspecialtoken(code[index],"end"))
-									{
-										console.log(procdef);
-										// TODO Define the procedure
-										this.define_procedure(procdef[0],procdef[1],procdef[2])
-										code = code.splice(index+1,code.length);
-										index = 0;
-										procdef = [[],[],[]];
-										inproc = false;	
-									}
-									if(inproc == true && vararg == false)
-									{
-										procdef[2][procdef[2].length] = code[index];	
-									}	
+                                    for(var index=0;index<=funcarity;index++)
+                                    {
+                                        if(index == code.length)
+                                        {
+                                            return [index,callarrray];
+                                        }
+                                        if(code[index] == "<multiarg>")
+                                        {
+                                            multivar++;	
+                                        }
+                                        if(multivar != 0)
+                                        {
+                                            funcarity++;
+                                        }
+                                        if(code[index] == "<endmultiarg>")
+                                        {
+                                            multivar --;
+                                        }
+                                        if(this.isproc_orfunc(code[index]))
+                                        {
+                                            funcarity += this.getfuncorprocarity(code[index]);
+                                        }
+                                        callarrray[callarrray.length] = code[index];
 
-							}	
-							return code; // Parsing complete 
-						}
-						this.isspecialtoken = function(token,check)
-						{
-							// TODO
-							if(token == check)
-							{
-								return true;	
-							}	
-							return false;
-						}
-						this.multiargparans = function(code)
-						{
-							for(index = 0;index<code.length;index++)
-							{
-								if(code[index] == "(")
-								{
-									if(parseNum(code[index]) === false)
-									{
-										code[index] = "<multiarg>";
-										code = code.slice(0,index).concat(this.multiargparans(code.slice(index,code.length)));
-										for(var index_2 = 0;index_2<code.length;index_2++)
-										{
-											if(code[index_2] == ")")
-											{
-												code[index_2] = "<endmultiarg>";	
-											}
-										}
-									}
-								}	
-							}
-							return code;	
-						}
-						this.tokenize = function(input) {
-							var tokens = [];
-							// Iterate over String
-							var index = 0, whitespace = 0;
-							while (index < input.length) {
-								if (input[index] == " ") {
-									index++;
-								}
-								if (input[index] == "[") {
-									// Beginning of a list found => parseList
-									var liste = this.parseliste(input.slice(index));
-									tokens[tokens.length] = liste[0];
-									index += liste[1];
-									index++;
-								} else if (input[index] == "\"") {
-									// " Found => Beginning of a string
-									var liste = this.parsestring(input.slice(index));
-									tokens[tokens.length] = liste[0];
-									index += liste[1];
-								} else {
+                                    }
+                                    // MAYBE SPLICE CODE HERE --> no longer needed ?!
+                                    return [index,callarrray];
+                                }	
+                            }	
+                        }
+                        function clone(obj) {
+                            if(obj == null || typeof(obj) != 'object')
+                                return obj;
 
-									var liste = this.parsestring(input.slice(index));
-									if(liste[0] == "-" && (parseNum(tokens[tokens.length-1]) === false || tokens[tokens.length-1] === undefined))
-									{
-										
-										liste[0] = "MINUS";	// Unary minus
-									}
-									tokens[tokens.length] = liste[0];
-									index += liste[1];
-								}
+                            var temp = obj.constructor(); // changed
 
-								// Append parsed
-							}
-							return tokens;
-						};
+                            for(var key in obj) {
+                                if(obj.hasOwnProperty(key)) {
+                                    temp[key] = clone(obj[key]);
+                                }
+                            }
+                            return temp;
+                        }
+                        this.parse_code = function(code)
+                        {
+                            // 1st Tokenize the Input
+                            var code = this.tokenize(code);
+                            var klammern = 0;
+                            for(var index = 0;index<code.length;index++)
+                            {
+                                if(code[index] == "(")
+                                {
+                                    klammern++;	
+                                }
+                                if(code[index] == ")")
+                                {
+                                    klammern--;	
+                                }	
+                            }
 
-						this.parseliste = function(string) {
-							var liste = [];
-							// Array für die Liste selbst
 
-							for (var i = 1; i < string.length; i++) {
-								element = string[i];
-								if (element == " ") 
-								{
-									// Move on to next
+                            if(klammern != 0)
+                            {
+                                alert("Klammer Fehler");
+                                return;	
+                            }
+                            alert(code);
 
-								}
-								if (element == "]") 
-								{
-									return [liste, i];
-								}
+                            // Booleans CAN ONLY be parsed correctly at execution time
+                            code = this.multiargparans(code);
+                            alert(code);
+                            for(var index = 0; index<code.length;index++)
+                            {
+                                // First check if index is + - * / 
+                                if(code[index] == "+" || code[index] == "-" || code[index] == "*" || code[index] == "/" && parseNum(code[index-1]) !== false && parseNum(code[index+1]) !== false)
+                                {
+                                    var oldindex = index;
+                                    // Begin
+                                    var infixtokens = [code[index-1]];
+                                    while(code[index] == "+" || code[index] == "-" || code[index] == "*" || code[index] == "/" || parseNum(code[index]) !== false)
+                                    {
+                                        infixtokens[infixtokens.length] = code[index];
+                                        index++;
+                                        
+                                    }
+                                    code = code.slice(0,oldindex-1).concat(this.parseinfix(infixtokens)).concat(code.slice(index,code.length));
+                                    alert(this.parseinfix(infixtokens));
+                                }
+                            }
+                            
+                            for(var index=0;index<code.length;index++)
+                            {
+                                if(code[index] == "+") {code[index] = "sum";}
+                                if(code[index] == "*") {code[index] = "product";}
+                                if(code[index] == "/") {code[index] = "quotient";}
+                                if(code[index] == "-") {code[index] = "difference";}
+                            }
+                            // TODO Parse macros
+                            var inproc = false;
+                            var vararg = true;
+                            var procdef = [[],[],[]];
+                            for(var index = 0;index<code.length;index++)
+                            {
+                                if(this.isspecialtoken(code[index],"to"))
+                                {
 
-								if (element == "[") 
-								{
-									// Run the function itself
-									//console.log(liste);
-									var neueliste = (this.parseliste(string.slice(i)));
+                                    inproc = true;
+                                    procdef[0] = code[index+1];
+                                    index++;	
+                                }	
+                                else if(code[index][0] == ":" && ltype(code[index]) != "list" && vararg == true)
+                                {
+                                    procdef[1][procdef[1].length] = code[index];
+                                }else{
+                                    vararg = false;	
+                                }
+                                if(this.isspecialtoken(code[index],"end"))
+                                {
+                                    console.log(procdef);
+                                    // TODO Define the procedure
+                                    this.define_procedure(procdef[0],procdef[1],procdef[2])
+                                    code = code.splice(index+1,code.length);
+                                    index = 0;
+                                    procdef = [[],[],[]];
+                                    inproc = false;	
+                                }
+                                if(inproc == true && vararg == false)
+                                {
+                                    procdef[2][procdef[2].length] = code[index];	
+                                }	
 
-									i += (this.parseliste(string.slice(i)))[1];
-									liste[liste.length] = neueliste[0];
-								}
-								else 
-								{
-									liste[liste.length] = this.parseliststring(string.slice(i),true,true)[0];
-									i += this.parseliststring(string.slice(i),true,true)[1];
+                            }	
+                            return code; // Parsing complete 
+                        }
+                        this.isspecialtoken = function(token,check)
+                        {
+                            // TODO
+                            if(token == check)
+                            {
+                                return true;	
+                            }	
+                            return false;
+                        }
+                        this.multiargparans = function(code)
+                        {
+                            for(index = 0;index<code.length;index++)
+                            {
+                                if(code[index] == "(")
+                                {
+                                    if(parseNum(code[index]) === false)
+                                    {
+                                        code[index] = "<multiarg>";
+                                        code = code.slice(0,index).concat(this.multiargparans(code.slice(index,code.length)));
+                                        for(var index_2 = 0;index_2<code.length;index_2++)
+                                        {
+                                            if(code[index_2] == ")")
+                                            {
+                                                code[index_2] = "<endmultiarg>";	
+                                            }
+                                        }
+                                    }
+                                }	
+                            }
+                            return code;	
+                        }
+                        this.tokenize = function(input) {
+                            var tokens = [];
+                            // Iterate over String
+                            var index = 0, whitespace = 0;
+                            while (index < input.length) {
+                                if (input[index] == " ") {
+                                    index++;
+                                }
+                                if (input[index] == "[") {
+                                    // Beginning of a list found => parseList
+                                    var liste = this.parseliste(input.slice(index));
+                                    tokens[tokens.length] = liste[0];
+                                    index += liste[1];
+                                    index++;
+                                } else if (input[index] == "\"") {
+                                    // " Found => Beginning of a string
+                                    var liste = this.parsestring(input.slice(index));
+                                    tokens[tokens.length] = liste[0];
+                                    index += liste[1];
+                                } else {
 
-								}
+                                    var liste = this.parsestring(input.slice(index));
+                                    if(liste[0] == "-" && (parseNum(tokens[tokens.length-1]) === false || tokens[tokens.length-1] === undefined))
+                                    {
 
-							}
-							return [liste, i];
-							// Return statement
+                                        liste[0] = "MINUS";	// Unary minus
+                                    }
+                                    tokens[tokens.length] = liste[0];
+                                    index += liste[1];
+                                }
 
-						};
+                                // Append parsed
+                            }
+                            return tokens;
+                        };
 
-						this.parsestring = function(stringel, ohneanfuehrungszeichen, calledfromlist) {
-							var string = "";
-							var returnfromlist = false;
-							if (!calledfromlist) {
-								calledfromlist = false;
-							}
-							if(!calledfromlist)
-							{
-							if(stringel[0] == "\"")
-							{
-								string = "\"";
-							}
-							if(stringel[0] == "+")
-							{
-								return ["+",1];
-							}
-							if(stringel[0] == "-")
-							{
-								return ["-",1];
-							}
-							if(stringel[0] == "*")
-							{
-								return ["*",1];
-							}
-							if(stringel[0] == "/")
-							{
-								return ["/",1];
-							}
-							if(stringel[0] == "(")
-							{
-								return ["(",1];
-							}
-							if(stringel[0] == ")")
-							{
-								return [")",1];
-							}
-							}
-							if (!ohneanfuehrungszeichen && stringel[0] != "\"") {
-								// 
-								stringel = "\"" + stringel;
-								returnfromlist = true;
-								// 
-							}
-							var escaped = false;
-							
-							// Used for parsing strings in Logo
-							for (var index = 0; index < stringel.length; index++) {
+                        this.parseliste = function(string) {
+                            var liste = [];
+                            // Array für die Liste selbst
 
-								var element = stringel[index];
-								if (element == "]" && calledfromlist == true && escaped == false) {
-									return [string, index-1];
-								}
-								if((element == "+" || element == "-" || element == "*" || element == "/" || element == "(" || element == ")")  && (parseNum(string) != false && calledfromlist == false ))
-								{
-									if(returnfromlist)
-									{
-										return [string, index-1];
-									}
-								}
-								if(element == "[" && returnfromlist == true)
-								{
-									return [string, index-1];
-								}
-								if (element != "\\" && escaped == false && element != "\"") {
-									
-									if (element == " ") {
-										return [string, index];
-									}
-									string = string + element;
+                            for (var i = 1; i < string.length; i++) {
+                                element = string[i];
+                                if (element == " ") 
+                                {
+                                    // Move on to next
 
-								} else if (escaped == true) {
-									// Check for escape characters
-									if (element == " ") {
-										string = string + " ";
-									}
-									if (element == "n") {
-										string = string + "\n";
-									}
-									if (element == "\t") {
-										string = string + "\t";
-									}
-									// TODO Add new escape characters
-									escaped = false;
-								} else if (element == "\\") {
-									escaped = true;
-								}
+                                }
+                                if (element == "]") 
+                                {
+                                    return [liste, i];
+                                }
 
-							}
-							return [string, index];
-						};
-						this.parseliststring = function(stringel, ohneanfuehrungszeichen, calledfromlist) 
-						{
-							
-							var string = "";
-							var returnfromlist = false;
-							if (!calledfromlist) {
-								calledfromlist = false;
-							}
-							
-							if (!ohneanfuehrungszeichen && stringel[0] != "\"") {
-								// 
-								stringel = "\"" + stringel;
-								returnfromlist = true;
-								// 
-							}
-							var escaped = false;
-							
-							// Used for parsing strings in Logo
-							for (var index = 0; index < stringel.length; index++) {
+                                if (element == "[") 
+                                {
+                                    // Run the function itself
+                                    //console.log(liste);
+                                    var neueliste = (this.parseliste(string.slice(i)));
 
-								var element = stringel[index];
-								if (element == "]" && calledfromlist == true && escaped == false) {
-									return [string, index-1];
-								}
-								if(element == "[" && returnfromlist == true)
-								{
-									return [string, index-1];
-								}
-								if (element != "\\" && escaped == false && element != "\"") {
-									
-									if (element == " ") {
-										return [string, index];
-									}
-									string = string + element;
+                                    i += (this.parseliste(string.slice(i)))[1];
+                                    liste[liste.length] = neueliste[0];
+                                }
+                                else 
+                                {
+                                    liste[liste.length] = this.parseliststring(string.slice(i),true,true)[0];
+                                    i += this.parseliststring(string.slice(i),true,true)[1];
 
-								} else if (escaped == true) {
-									// Check for escape characters
-									if (element == " ") {
-										string = string + " ";
-									}
-									if (element == "n") {
-										string = string + "\n";
-									}
-									if (element == "\t") {
-										string = string + "\t";
-									}
-									// TODO Add new escape characters
-									escaped = false;
-								} else if (element == "\\") {
-									escaped = true;
-								}
+                                }
 
-							}
-							return [string, index];
-						};
-						this.primitives = [];
-						this.define = function(funcnames,fn,fnarity,scope)
-						{
-							// Function for defining functions
-							if(!scope)
-							{
-								scope = false;	
-							}
-							if(!fnarity)
-							{
-								fnarity = fn.length; 
-							}
-							// TODO Check if funcname is already used
-							
-							this.primitives[this.primitives.length] = [funcnames,fn,fnarity,scope]; 
-							console.log([funcnames,fn,fnarity]);
-						};
-						this.langalt = function(funcname,name,lang)
-						{
-								// Append to any kind of array
-						};
-						this.procedures = [];
-						this.define_procedure = function(prname,inputs,body)
-						{
-							 // Append to this.procedures
-							 this.procedures[this.procedures.length] = [prname,inputs,body];
-						}
-						this.isproc_orfunc = function(fname)
-						{
-							for(var index = 0;index<this.primitives.length;index++)
-							{
-								for(var index_2 = 0;index_2<this.primitives[index][0].length;index_2++)
-								{
-									if(this.primitives[index][0][index_2] == fname)
-									{
-										return true;	
-									}	
-								}	
-							}	
-							for(var index = 0;index<this.procedures.length;index++)
-							{
-								if(this.procedures[index][0] == fname)
-								{
-									return true;	
-								}	
-							}
-							return false;
-						}
-						this.getfuncorprocarity = function(fname)
-						{
-							for(var index = 0;index<this.primitives.length;index++)
-							{
-								for(var index_2 = 0;index_2<this.primitives[index][0].length;index_2++)
-								{
-									if(this.primitives[index][0][index_2] == fname)
-									{
-										if(this.primitives[index][2] == -1)
-										{
-											return this.primitives[index][1].length;
-										}
-										return this.primitives[index][2];	
-									}	
-								}	
-							}	
-							for(var index = 0;index<this.procedures.length;index++)
-							{
-								if(this.procedures[index][0] == fname)
-								{
-									return this.procedures[index][1].length;	
-								}	
-							}
-							return undefined;
-						}
-						this.is_function = function(funcname)
-						{
-							for(var index = 0;index<this.primitives.length;index++)
-							{
-								for(var index_2 = 0;index_2<this.primitives[0].length;index_2++)
-								{
-									if(this.primitives[0][index_2] == funcname)
-									{
-										return true;	
-									}	
-								}
-							}
-							return false;	
-						};
-						this.parseinfix = function(array)
-						{
-							array.reverse;
-							stack = []; // Stack
-							prefixlist = []; // List with commands
-							for(var i = array.length-1;i>=0;i--)
-							{
-								var element = array[i];
+                            }
+                            return [liste, i];
+                            // Return statement
 
-								if(is_operand(element))
-								{
-									prefixlist[prefixlist.length] = element;
-								}
-								
-								if(is_operator(element))
-								{
-										while((!stack_empty(stack)) && precedence(element) <= precedence(stack_top(stack)) ){
-											// Add while part
-											prefixlist[prefixlist.length] = stack_top(stack);
-											pop_stack(stack);
-										}
-										push_stack(stack,element);
+                        };
 
-								}
-								if(element == ")")
-								{
-										push_stack(stack,")");	
-								}
-								
-								if(element == "(")
-								{
-									while(stack_top(stack) != ")")
-									{
-										var append_operator = pop_stack(stack);
-										prefixlist[prefixlist.length] = append_operator;
-									}
-									pop_stack(stack);		
-							}
-						}
-						
-						while(!stack_empty(stack))
-						{
-								if(stack_top(stack) == ")")
-								{
-									pop_stack(stack);	
-								}
-								else
-								{
-									prefixlist[prefixlist.length] = pop_stack(stack);	
-								}
-						}
-						prefixlist.reverse();
-						return prefixlist;
-	
-						};
-						// Helepers for Infix
-						function is_operand(opr)
-						{
-							return !is_operator(opr) && (opr != "(" && opr != ")") ? 1:0	
-						}
-						function is_operator(opr)
-						{
-							if(opr == "+")
-							{
-								return true;
-							}
-							if(opr == "-")
-							{
-								return true;
-							}
-							if(opr == "*")
-							{
-								return true;
-							}
-							if(opr == "/")
-							{
-								return true;
-							}	
-							if(opr == "^")
-							{
-								return true;
-							}
-							// TODO Modulo maybe
-							if(opr == "$")
-							{
-								return true;
-							}
-							return false;
-						}
-							// Stack Helpers
-						function stack_empty(stack)
-						{
-							return stack.length == 0 ? true : false;	
-						}
-						function stack_top(stack)
-						{
-							return stack[stack.length-1]	
-						}
-						function pop_stack(stack)
-						{
-							return stack.pop();	
-						}
-						function push_stack(stack,el)
-						{
-							stack[stack.length] = el;	
-						}
-						function precedence(operator)
-						{
-							if(operator == "^" || operator == "$") {return 7;}
-							if(operator ==  "*" ){return 6;}
-							if(operator ==  "/" ){return 5;}
-							if(operator ==  "+" ){return 4;}
-							if(operator ==  "-" ){return 3;}
-							if(operator ==  "(" ){return 2;}
-							if(operator ==  ")" ){return 1;}
-						}
-						
-						this.translate = function(lang,engname,gername)
-						{
-							
-						};
+                        this.parsestring = function(stringel, ohneanfuehrungszeichen, calledfromlist) {
+                            var string = "";
+                            var returnfromlist = false;
+                            if (!calledfromlist) {
+                                calledfromlist = false;
+                            }
+                            if(!calledfromlist)
+                            {
+                                if(stringel[0] == "\"")
+                                {
+                                    string = "\"";
+                                }
+                                if(stringel[0] == "+")
+                                {
+                                    return ["+",1];
+                                }
+                                if(stringel[0] == "-")
+                                {
+                                    return ["-",1];
+                                }
+                                if(stringel[0] == "*")
+                                {
+                                    return ["*",1];
+                                }
+                                if(stringel[0] == "/")
+                                {
+                                    return ["/",1];
+                                }
+                                if(stringel[0] == "(")
+                                {
+                                    return ["(",1];
+                                }
+                                if(stringel[0] == ")")
+                                {
+                                    return [")",1];
+                                }
+                            }
+                            if (!ohneanfuehrungszeichen && stringel[0] != "\"") {
+                                // 
+                                stringel = "\"" + stringel;
+                                returnfromlist = true;
+                                // 
+                            }
+                            var escaped = false;
 
-					}
-					// TODO Funktionen mit mehr als einem Argument => Satz korrekt darstellen
-					
-					
-					// Interpretation
-					
-					
-					// Definition von Funktionen
-					
-					var globaltable = test;
-					
-					// Data Structure PRIMITIVES
-					function ltype(atom)
-					{
-						// Function which returns a logo like type
-						if(typeof atom === 'string')
-						{
-							return "word";
-						}
-						if(typeof atom === 'object')
-						{
-							return "list";
-						}
-						if(typeof atom === 'number')
-						{
-							return "number";
-						}
-						
-						// TODO Throw error => not a Logo Type but bollean maybe?
-					}
-					
-					function parseNum(number)
-					{
-						// A function for parsing strings to numbers (conversion)
-						if(number == "")
-						{
-							return false;
-						}
-						if(!isNaN(number))
-						{
-							return parseFloat(number);
-						}
-						else{
-							return false;
-						}
-					}
-					// Constructors
-					globaltable.define(["list"],function(a,b){
-						// n elements but at least 2
-						if(!a || !b)
-						{
-							// Not enough inputs
-							// TODO Throw an error
-							
-						}
-						var liste = [];
-						for(var argc = 0;argc<arguments.length;argc++)
-						{
-							liste[liste.length] = arguments[argc];
-						}
-						
-						return liste;
-						
-					},-1);
-					
-					globaltable.define(["word"],function(a,b){
-						// n elements but at least 2
-						if(!a || !b)
-						{
-							// Not enough inputs
-							// TODO Throw an error
-							
-						}
-						var wort = "";
-						for(var argc = 0;argc<arguments.length;argc++)
-						{
-							if(ltype(arguments[argc]) == "list")
-							{
-								// TODO Throw an error => list can't be sentenced
-								
-							}
-							wort = wort + arguments[argc];
-						}
-						
-						return wort;
-						
-					},-1);
-					
-					globaltable.define(["sentence","se"],function(a,b){
-						// n elements but at least 2
-						if(!a || !b)
-						{
-							// Not enough inputs
-							// TODO Throw an error
-							
-						}
-						var sentence = "";
-						for(var argc = 0;argc<arguments.length;argc++)
-						{
-							if(ltype(arguments[argc]) == "list")
-							{
-								// TODO Sentence the list
-								
-							}
-							sentence = sentence + arguments[argc] + " ";
-						}
-						
-						return sentence;
-						
-					},-1);
-					
-					globaltable.define(["fput"],function(a,b){
-						// n elements but at least 
-						if(!a || !b)
-						{
-							// Not enough inputs
-							// TODO Throw an error
-							
-						}
-						var list = b;
-						var extra = a;
-						if(list == extra){
-							// TODO Zirkuläre Liste (warining / error)
-							
-						}
-						list.push(extra);
-						return list;
-						
-					});
-					
-					globaltable.define(["fput"],function(a,b){
-						// n elements but at least 
-						if(!a || !b)
-						{
-							// Not enough inputs
-							// TODO Throw an error
-							
-						}
-						var list = b;
-						var extra = a;
-						if(list == extra){
-							// TODO Zirkuläre Liste
-						}
-						list.push(extra);
-						return list;
-						
-					});
-					
-					globaltable.define(["lput"],function(a,b){
-						// n elements but at least 
-						if(!a || !b)
-						{
-							// Not enough inputs
-							// TODO Throw an error
-							
-						}
-						var list = b;
-						var extra = a;
-						if(list == extra){
-							// TODO Zirkuläre Liste
-						}
-						list[list.length] = extra;
-						return list;
-						
-					});
-					
-					/*
+                            // Used for parsing strings in Logo
+                            for (var index = 0; index < stringel.length; index++) {
+
+                                var element = stringel[index];
+                                if (element == "]" && calledfromlist == true && escaped == false) {
+                                    return [string, index-1];
+                                }
+                                if((element == "+" || element == "-" || element == "*" || element == "/" || element == "(" || element == ")")  && (parseNum(string) != false && calledfromlist == false ))
+                                {
+                                    if(returnfromlist)
+                                    {
+                                        return [string, index-1];
+                                    }
+                                }
+                                if(element == "[" && returnfromlist == true)
+                                {
+                                    return [string, index-1];
+                                }
+                                if (element != "\\" && escaped == false && element != "\"") {
+
+                                    if (element == " ") {
+                                        return [string, index];
+                                    }
+                                    string = string + element;
+
+                                } else if (escaped == true) {
+                                    // Check for escape characters
+                                    if (element == " ") {
+                                        string = string + " ";
+                                    }
+                                    if (element == "n") {
+                                        string = string + "\n";
+                                    }
+                                    if (element == "\t") {
+                                        string = string + "\t";
+                                    }
+                                    // TODO Add new escape characters
+                                    escaped = false;
+                                } else if (element == "\\") {
+                                    escaped = true;
+                                }
+
+                            }
+                            return [string, index];
+                        };
+                        this.parseliststring = function(stringel, ohneanfuehrungszeichen, calledfromlist) 
+                        {
+
+                            var string = "";
+                            var returnfromlist = false;
+                            if (!calledfromlist) {
+                                calledfromlist = false;
+                            }
+
+                            if (!ohneanfuehrungszeichen && stringel[0] != "\"") {
+                                // 
+                                stringel = "\"" + stringel;
+                                returnfromlist = true;
+                                // 
+                            }
+                            var escaped = false;
+
+                            // Used for parsing strings in Logo
+                            for (var index = 0; index < stringel.length; index++) {
+
+                                var element = stringel[index];
+                                if (element == "]" && calledfromlist == true && escaped == false) {
+                                    return [string, index-1];
+                                }
+                                if(element == "[" && returnfromlist == true)
+                                {
+                                    return [string, index-1];
+                                }
+                                if (element != "\\" && escaped == false && element != "\"") {
+
+                                    if (element == " ") {
+                                        return [string, index];
+                                    }
+                                    string = string + element;
+
+                                } else if (escaped == true) {
+                                    // Check for escape characters
+                                    if (element == " ") {
+                                        string = string + " ";
+                                    }
+                                    if (element == "n") {
+                                        string = string + "\n";
+                                    }
+                                    if (element == "\t") {
+                                        string = string + "\t";
+                                    }
+                                    // TODO Add new escape characters
+                                    escaped = false;
+                                } else if (element == "\\") {
+                                    escaped = true;
+                                }
+
+                            }
+                            return [string, index];
+                        };
+                        this.primitives = [];
+                        this.define = function(funcnames,fn,fnarity,scope)
+                        {
+                            // Function for defining functions
+                            if(!scope)
+                            {
+                                scope = false;	
+                            }
+                            if(!fnarity)
+                            {
+                                fnarity = fn.length; 
+                            }
+                            // TODO Check if funcname is already used
+
+                            this.primitives[this.primitives.length] = [funcnames,fn,fnarity,scope]; 
+                            console.log([funcnames,fn,fnarity]);
+                        };
+                        this.langalt = function(funcname,name,lang)
+                        {
+                            // Append to any kind of array
+                        };
+                        this.procedures = [];
+                        this.define_procedure = function(prname,inputs,body)
+                        {
+                            // Append to this.procedures
+                            this.procedures[this.procedures.length] = [prname,inputs,body];
+                        }
+                        this.isproc_orfunc = function(fname)
+                        {
+                            for(var index = 0;index<this.primitives.length;index++)
+                            {
+                                for(var index_2 = 0;index_2<this.primitives[index][0].length;index_2++)
+                                {
+                                    if(this.primitives[index][0][index_2] == fname)
+                                    {
+                                        return true;	
+                                    }	
+                                }	
+                            }	
+                            for(var index = 0;index<this.procedures.length;index++)
+                            {
+                                if(this.procedures[index][0] == fname)
+                                {
+                                    return true;	
+                                }	
+                            }
+                            return false;
+                        }
+                        this.getfuncorprocarity = function(fname)
+                        {
+                            for(var index = 0;index<this.primitives.length;index++)
+                            {
+                                for(var index_2 = 0;index_2<this.primitives[index][0].length;index_2++)
+                                {
+                                    if(this.primitives[index][0][index_2] == fname)
+                                    {
+                                        if(this.primitives[index][2] == -1)
+                                        {
+                                            return this.primitives[index][1].length;
+                                        }
+                                        return this.primitives[index][2];	
+                                    }	
+                                }	
+                            }	
+                            for(var index = 0;index<this.procedures.length;index++)
+                            {
+                                if(this.procedures[index][0] == fname)
+                                {
+                                    return this.procedures[index][1].length;	
+                                }	
+                            }
+                            return undefined;
+                        }
+                        this.is_function = function(funcname)
+                        {
+                            for(var index = 0;index<this.primitives.length;index++)
+                            {
+                                for(var index_2 = 0;index_2<this.primitives[0].length;index_2++)
+                                {
+                                    if(this.primitives[0][index_2] == funcname)
+                                    {
+                                        return true;	
+                                    }	
+                                }
+                            }
+                            return false;	
+                        };
+                        this.parseinfix = function(array)
+                        {
+                            array.reverse;
+                            stack = []; // Stack
+                            prefixlist = []; // List with commands
+                            for(var i = array.length-1;i>=0;i--)
+                            {
+                                var element = array[i];
+
+                                if(is_operand(element))
+                                {
+                                    prefixlist[prefixlist.length] = element;
+                                }
+
+                                if(is_operator(element))
+                                {
+                                    while((!stack_empty(stack)) && precedence(element) <= precedence(stack_top(stack)) ){
+                                        // Add while part
+                                        prefixlist[prefixlist.length] = stack_top(stack);
+                                        pop_stack(stack);
+                                    }
+                                    push_stack(stack,element);
+
+                                }
+                                if(element == ")")
+                                {
+                                    push_stack(stack,")");	
+                                }
+
+                                if(element == "(")
+                                {
+                                    while(stack_top(stack) != ")")
+                                    {
+                                        var append_operator = pop_stack(stack);
+                                        prefixlist[prefixlist.length] = append_operator;
+                                    }
+                                    pop_stack(stack);		
+                                }
+                            }
+
+                            while(!stack_empty(stack))
+                            {
+                                if(stack_top(stack) == ")")
+                                {
+                                    pop_stack(stack);	
+                                }
+                                else
+                                {
+                                    prefixlist[prefixlist.length] = pop_stack(stack);	
+                                }
+                            }
+                            prefixlist.reverse();
+                            return prefixlist;
+
+                        };
+                        // Helepers for Infix
+                        function is_operand(opr)
+                        {
+                            return !is_operator(opr) && (opr != "(" && opr != ")") ? 1:0	
+                        }
+                        function is_operator(opr)
+                        {
+                            if(opr == "+")
+                            {
+                                return true;
+                            }
+                            if(opr == "-")
+                            {
+                                return true;
+                            }
+                            if(opr == "*")
+                            {
+                                return true;
+                            }
+                            if(opr == "/")
+                            {
+                                return true;
+                            }	
+                            if(opr == "^")
+                            {
+                                return true;
+                            }
+                            // TODO Modulo maybe
+                            if(opr == "$")
+                            {
+                                return true;
+                            }
+                            return false;
+                        }
+                        // Stack Helpers
+                        function stack_empty(stack)
+                        {
+                            return stack.length == 0 ? true : false;	
+                        }
+                        function stack_top(stack)
+                        {
+                            return stack[stack.length-1]	
+                        }
+                        function pop_stack(stack)
+                        {
+                            return stack.pop();	
+                        }
+                        function push_stack(stack,el)
+                        {
+                            stack[stack.length] = el;	
+                        }
+                        function precedence(operator)
+                        {
+                            if(operator == "^" || operator == "$") {return 7;}
+                            if(operator ==  "*" ){return 6;}
+                            if(operator ==  "/" ){return 5;}
+                            if(operator ==  "+" ){return 4;}
+                            if(operator ==  "-" ){return 3;}
+                            if(operator ==  "(" ){return 2;}
+                            if(operator ==  ")" ){return 1;}
+                        }
+
+                        this.translate = function(lang,engname,gername)
+                        {
+
+                        };
+
+                    }
+                    // TODO Funktionen mit mehr als einem Argument => Satz korrekt darstellen
+
+
+                    // Interpretation
+
+
+                    // Definition von Funktionen
+
+                    var globaltable = test;
+
+                    // Data Structure PRIMITIVES
+                    function ltype(atom)
+                    {
+                        // Function which returns a logo like type
+                        if(typeof atom === 'string')
+                        {
+                            return "word";
+                        }
+                        if(typeof atom === 'object')
+                        {
+                            return "list";
+                        }
+                        if(typeof atom === 'number')
+                        {
+                            return "number";
+                        }
+
+                        // TODO Throw error => not a Logo Type but bollean maybe?
+                    }
+
+                    function parseNum(number)
+                    {
+                        // A function for parsing strings to numbers (conversion)
+                        if(number == "")
+                        {
+                            return false;
+                        }
+                        if(!isNaN(number))
+                        {
+                            return parseFloat(number);
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                    // Constructors
+                    globaltable.define(["list"],function(a,b){
+                        // n elements but at least 2
+                        if(!a || !b)
+                        {
+                            // Not enough inputs
+                            // TODO Throw an error
+
+                        }
+                        var liste = [];
+                        for(var argc = 0;argc<arguments.length;argc++)
+                        {
+                            liste[liste.length] = arguments[argc];
+                        }
+
+                        return liste;
+
+                    },-1);
+
+                    globaltable.define(["word"],function(a,b){
+                        // n elements but at least 2
+                        if(!a || !b)
+                        {
+                            // Not enough inputs
+                            // TODO Throw an error
+
+                        }
+                        var wort = "";
+                        for(var argc = 0;argc<arguments.length;argc++)
+                        {
+                            if(ltype(arguments[argc]) == "list")
+                            {
+                                // TODO Throw an error => list can't be sentenced
+
+                            }
+                            wort = wort + arguments[argc];
+                        }
+
+                        return wort;
+
+                    },-1);
+
+                    globaltable.define(["sentence","se"],function(a,b){
+                        // n elements but at least 2
+                        if(!a || !b)
+                        {
+                            // Not enough inputs
+                            // TODO Throw an error
+
+                        }
+                        var sentence = "";
+                        for(var argc = 0;argc<arguments.length;argc++)
+                        {
+                            if(ltype(arguments[argc]) == "list")
+                            {
+                                // TODO Sentence the list
+
+                            }
+                            sentence = sentence + arguments[argc] + " ";
+                        }
+
+                        return sentence;
+
+                    },-1);
+
+                    globaltable.define(["fput"],function(a,b){
+                        // n elements but at least 
+                        if(!a || !b)
+                        {
+                            // Not enough inputs
+                            // TODO Throw an error
+
+                        }
+                        var list = b;
+                        var extra = a;
+                        if(list == extra){
+                            // TODO Zirkuläre Liste (warining / error)
+
+                        }
+                        list.push(extra);
+                        return list;
+
+                    });
+
+                    globaltable.define(["fput"],function(a,b){
+                        // n elements but at least 
+                        if(!a || !b)
+                        {
+                            // Not enough inputs
+                            // TODO Throw an error
+
+                        }
+                        var list = b;
+                        var extra = a;
+                        if(list == extra){
+                            // TODO Zirkuläre Liste
+                        }
+                        list.push(extra);
+                        return list;
+
+                    });
+
+                    globaltable.define(["lput"],function(a,b){
+                        // n elements but at least 
+                        if(!a || !b)
+                        {
+                            // Not enough inputs
+                            // TODO Throw an error
+
+                        }
+                        var list = b;
+                        var extra = a;
+                        if(list == extra){
+                            // TODO Zirkuläre Liste
+                        }
+                        list[list.length] = extra;
+                        return list;
+
+                    });
+
+                    /*
 					 * NOT SUPPORTED : ARAY MDARRAY LISTTOARRAY (ARRAYS IN GENERAL)
 					 */
-					
-					// SELECTORS
-					
-					globaltable.define(["first"],function(list){
-						if(!list)
-						{
-							// No argument supplied
-						}
-						if(typeof list === "undefined" )
-						{
-							// Return with error
-						}
-						if(list.length == 0)
-						{
-							return "";
-						}
-						return list[0];
 
-					});
-					
-					globaltable.define(["firsts"],function(list){
-						// TODO Type checking
-						if(ltype(list) != "list")
-						{
-							// TODO Throw TypeError
-						}
-						var liste = [];
-						for(var index = 0;index<list.length;index++)
-						{
-							// TODO Check if element [0] doesn't exist
-							liste.push(list[index][0]);
-						}
-						return liste;
-					});
-					
-					globaltable.define(["last"],function(wordorlist){
-						if(false) // TODO Type-checking wordorlist
-						{
-							// TODO Throw an error
-						}
-						if(!wordorlist.length >= 1)
-						{
-							// TODO error	
-						}
-						return wordorlist[wordorlist.length-1];
-						
-					});
-					
-					globaltable.define(["butfirst","bf"],function(wordorlist){
-						if(false) // TODO Type-checking wordorlist
-						{
-							// TODO Throw an error
-						}
-						if(!wordorlist.length >= 1)
-						{
-							// TODO error	
-						}
-						return wordorlist.slice(1);
-						
-					});
-					
-					globaltable.define(["butfirsts"],function(list){
-						// TODO Type checking
-						if(ltype(list) != "list")
-						{
-							// TODO Throw TypeError
-						}
-						var liste = [];
-						for(var index = 0;index<list.length;index++)
-						{
-							// TODO Check if element [0] doesn't exist
-							liste.push(list[index].slice(1));
-						}
-						return liste;
-					});
-					
-					globaltable.define(["butlast","bl"],function(wordorlist){
-						if(false) // TODO Type-checking wordorlist
-						{
-							// TODO Throw an error
-						}
-						if(!wordorlist.length >= 1)
-						{
-							// TODO error	
-						}
-						return wordorlist.slice(0,wordorlist.length-2);
-						
-					});
-					
-					globaltable.define(["item"],function(index,thing){
-						// TODO wordorlist
-						return thing[index-1];
-					});
-					
-					// TODO Quoted
-					
-					//MUTATORS
-					
-					/*
+                    // SELECTORS
+
+                    globaltable.define(["first"],function(list){
+                        if(!list)
+                        {
+                            // No argument supplied
+                        }
+                        if(typeof list === "undefined" )
+                        {
+                            // Return with error
+                        }
+                        if(list.length == 0)
+                        {
+                            return "";
+                        }
+                        return list[0];
+
+                    });
+
+                    globaltable.define(["firsts"],function(list){
+                        // TODO Type checking
+                        if(ltype(list) != "list")
+                        {
+                            // TODO Throw TypeError
+                        }
+                        var liste = [];
+                        for(var index = 0;index<list.length;index++)
+                        {
+                            // TODO Check if element [0] doesn't exist
+                            liste.push(list[index][0]);
+                        }
+                        return liste;
+                    });
+
+                    globaltable.define(["last"],function(wordorlist){
+                        if(false) // TODO Type-checking wordorlist
+                        {
+                            // TODO Throw an error
+                        }
+                        if(!wordorlist.length >= 1)
+                        {
+                            // TODO error	
+                        }
+                        return wordorlist[wordorlist.length-1];
+
+                    });
+
+                    globaltable.define(["butfirst","bf"],function(wordorlist){
+                        if(false) // TODO Type-checking wordorlist
+                        {
+                            // TODO Throw an error
+                        }
+                        if(!wordorlist.length >= 1)
+                        {
+                            // TODO error	
+                        }
+                        return wordorlist.slice(1);
+
+                    });
+
+                    globaltable.define(["butfirsts"],function(list){
+                        // TODO Type checking
+                        if(ltype(list) != "list")
+                        {
+                            // TODO Throw TypeError
+                        }
+                        var liste = [];
+                        for(var index = 0;index<list.length;index++)
+                        {
+                            // TODO Check if element [0] doesn't exist
+                            liste.push(list[index].slice(1));
+                        }
+                        return liste;
+                    });
+
+                    globaltable.define(["butlast","bl"],function(wordorlist){
+                        if(false) // TODO Type-checking wordorlist
+                        {
+                            // TODO Throw an error
+                        }
+                        if(!wordorlist.length >= 1)
+                        {
+                            // TODO error	
+                        }
+                        return wordorlist.slice(0,wordorlist.length-2);
+
+                    });
+
+                    globaltable.define(["item"],function(index,thing){
+                        // TODO wordorlist
+                        return thing[index-1];
+                    });
+
+                    // TODO Quoted
+
+                    //MUTATORS
+
+                    /*
 					 * The following primitves work different as in UCBLogo
 					 * * setitem: Only sets 1 item, doesn't every occuarence of element
 					 */
-					globaltable.define(["setitem"],function(index,list,value){
-						// TODO wordorlist
-						if(index <= list.length){
-							
-						}
-						if(value == list)
-						{
-							// TODO Circular list? Copy first
-						}
-						list[index-1] = value;
-						return list;
-					});
-					
-					// MISIING setbutfirst,array mutation
-					
-					// Predicates
-					
-					globaltable.define(["wordp","word?"],function(word){
-						if(ltype(word) == "word")
-						{
-							return true;
-						}else{
-							return false;
-						}
-					});
-					
-					globaltable.define(["listp","list?"],function(word){
-						if(ltype(word) == "list")
-						{
-							return true;
-						}else{
-							return false;
-						}
-					});
-					
-					globaltable.define(["emptyp","empty?"],function(word){
-						if(ltype(word) == "word")
-						{
-							if(word == "")
-							{
-								return true;
-							}
-						}else if(ltype(word) == "list"){
-							if(word == [])
-							{
-								return true;
-							}
-						}
-						return false;
-					});
-					
-					globaltable.define(["equalp","equal?"],function(a,b){
-						
-						if(a == b)
-						{
-							return true;
-						}
-						return false;
-					});
-					// TODO beforep
-					// MISSING .eq (no nodes in js)
-					
-					globaltable.define(["memberp","member?"],function(thing1,thing2){
-						 // Using indexof
-						 if(thing2.indexof(thing2) != -1)
-						 {
-						  return true;
-						 }
-						 return false;
-					});
-					
-					globaltable.define(["numberp","number"],function(x){
-						if(!isNan(x) && x != "")
-						{
-							return true;
-						}
-						// TODO Might not be correct ... ?
-					});
-					// MISSING backslashedp
-					
-					// Queries
-					globaltable.define(["count"],function(wordorlist){
-						// TODO Type Checking (wordorlist)
-						return wordorlist.length;
-					});
-					globaltable.define(["ascii"],function(char){
-						if(ltype(char) != "word")
-						{
-							// TODO Throw Type Error
-						}
-						if(char.length != 1)
-						{
-							// TODO Throw length error (return 0)
-						}
-						return char[0].charCodeAt(0);
-					});
-					// MISSING rawascii
-					globaltable.define(["char"],function(x){
-						// TODO Type-check: x is Int
-						return String.fromCharCode(x);
-					});
-					
-					globaltable.define(["member"],function(thing1,thing2){
-						// TODO Implementation
-					});
-					
-					globaltable.define(["lowercase"],function(word){
-						if(ltype(word) != "word")
-						{
-							// TODO Raise an error
-						}
-						return word.toLowerCase();
-					});
-					
-					globaltable.define(["uppercase"],function(word){
-						if(ltype(word) != "word")
-						{
-							// TODO Raise an error
-						}
-						return word.toUpperCase();
-					});
-					
-					// Missing parse
-					// Missing standout
-					// Missing runparse
-					
-					// TODO Transmitters
-					
-					// Recievers
-					globaltable.define(["readlist","rl"],function(){
-						var result = prompt("Please enter a list", "");
-						// TODO Parse the list
-					});
-					
-					globaltable.define(["readword","rw"],function(){
-						var result = prompt("Please enter a word", "");
-						return result;
-					});
-					
-					globaltable.define(["readchar","rc"],function(){
-						var result = prompt("Please enter a character", "");
-						// TODO Parse the list
-						
-						return result[0];
-					});
-					
-					// TODO readchars
-					
-					// TODO FILEACCESS (Using ajax???)
-					
-					// TODO Terminal Access
-					
-					// Arithmetic
-					
-					globaltable.define(["sum"],function(a,b)
-					{
-						var result = 0;
-						if(arguments.length != 2)
-						{
-							// TODO 
-						}
-						for(var index = 0;index<arguments.length;index++)
-						{
-							var input = arguments[index];
-							var number = parseNum(input);
-							if(number === false) // Type Checking, because 0 might be evaluated as false
-							{
-							// TODO Throw numerror
-							}
-							result += number;
-						}
-						return result;
-					},-1);
-					
-					globaltable.define(["difference"],function(a,b){
-						if(!a || !b)
-						{
-							// TODO die with error
-						}
-						var num1 = parseNum(a);
-						var num2 = parseNum(b);
-						
-						if(a === false)
-						{
-							// TODO Throw an error
-						}
-						if(b === false || b == 0) // Check for b = 0 --> 
-						{
-							// TODO Throw an error
-						}
-						return a-b;
-					});
-					// TODO Type checking in product
-					globaltable.define(["product"],function(a,b){
-						var result = parseNum(arguments[0]);
-						if(!a && !b)
-						{
-							return 1;
-						}
-						if(arguments.length == 2)
-						{
-							return a*b;
-						}
-						for(var index = 1;index<arguments.length;index++)
-						{
-							var input = arguments[index];
-							var number = parseNum(input);
-							if(number === false) // Type Checking, because 0 might be evaluated as false
-							{
-							// TODO Throw numerror
-							}
-							result *= number;
-						}
-						return result;
-					},-1);
-					
-					globaltable.define(["quotient"],function(a,b){
-						var num1 = parseNum(arguments[0]);
-						var num2 = parseNum(arguments[1]);
-						if(num1 === false || num2 === false)
-						{
-							// TODO Throw an error	
-						}
-						if(arguments.length != 2)
-						{
-							// Check for 
-						}
-						
-						return num1/num2;
-					},-1);
-					
-					globaltable.define(["modulo"],function(a,b){
-						if(!a || !b)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						var num2;
-						// Check if this works
-						if(num2 = parseNum(b) === false)
-						{
-							// TODO numerror
-						}
-						
-						return ((num2 % num1) + num1) % num1;
-					});
-					
-					globaltable.define(["remainder"],function(a,b){
-						if(!a || !b)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						var num2;
-						// Check if this works
-						if(num2 = parseNum(b) === false)
-						{
-							// TODO numerror
-						}
-						
-						return num1%num2;
-					});
-					
-					
-					globaltable.define(["int"],function(a){
-						if(!a)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						
-						return ~~num1;
-					});
-					
-					globaltable.define(["round"],function(a){
-						if(!a)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						
-						return Math.round(num1);
-					});			
-					
-					globaltable.define(["sqrt"],function(a){
-						if(!a)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						
-						if(num1 < 0)
-						{
-							// Throw an error
-						}
-						return Math.sqrt(num1);
-					});
-					
-					globaltable.define(["round"],function(a,b){
-						if(!a || !b)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						
-						var num2;
-						// Check if this works
-						if(num2 = parseNum(b) === false)
-						{
-							// TODO numerror
-						}
-						
-						return Math.pow(num1,num2);
-					});
-					
-					globaltable.define(["exp"],function(a){
-						if(!a)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						
-						if(num1 < 0)
-						{
-							// Throw an error
-						}
-						return Math.exp(num1);
-					});
-					// MISSING log10
-					globaltable.define(["ln"],function(a){
-						if(!a)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						
-						if(num1 < 0)
-						{
-							// Throw an error
-						}
-						return Math.log(num1);
-					});
-					
-					globaltable.define(["sin"],function(a){
-						if(!a)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						
-						if(num1 < 0)
-						{
-							// Throw an error
-						}
-						return Math.sin(num1);
-					});
-					
-					// Missing radsin
-					
-					globaltable.define(["cos"],function(a){
-						if(!a)
-						{
-							// TODO argerror
-						}
-						var num1;
-						// Check if this works
-						if(num1 = parseNum(a) === false)
-						{
-							// TODO numerror
-						}
-						
-						if(num1 < 0)
-						{
-							// Throw an error
-						}
-						return Math.cos(num1);
-					});
-					// Missing radcos
-					// Missing arctan
-					// Missing ractarn
-					
-					// PREDICATES
-					globaltable.define(["lessp","less?"],function(a,b){
-						if(!a || !b)
-						{ /* error */ }
-						if(a<b)
-						{
-							return true;
-						}
-						return false;
-					});
-					
-					globaltable.define(["greaterp","greater?"],function(a,b){
-						if(!a || !b)
-						{ /* error */ }
-						if(a>b)
-						{
-							return true;
-						}
-						return false;
-					});
-					
-					globaltable.define(["random"],function(highest){
-						var num_highest;
-						if((num_highest = parseNum(highest)) == false)
-						{
-							// TODO dye with error
-						}
-						return Math.floor((Math.random() * num_highest)); 
-					});
-					
-					// MISSING rerandom
-					// MISSING form
-					globaltable.define(["form"],function(num,nwidth,precision){
-						
-						});
-					
-					// MISSING bitand,bitor,bitxor,bitnot,ashift,lshift
-					
-					globaltable.define(["and"],function(){
-						var args = arguments;
-						for(var index = 0;index<args.length;index++)
-						{
-							if(args[index] != "true") // TODO Type converting
-							{
-								return false;	
-							}	
-						}
-						return true;
-						},-1);
-					
-					globaltable.define(["or"],function(){
-						var args = arguments;
-						for(var index = 0;index < args.length;index++)
-						{
-							if(args[index] == "true")
-							{
-								return true;	
-							}	
-						}
-						return false;
-					},-1);
-					
-					globaltable.define(["not"],function(tfexpr){
-						if(tfexpr == "true")
-						{
-							return false;	
-						}	
-						
-						if(tfexpr == false)
-						{
-							return true;	
-						}
-					});
-					
-					globaltable.define(["make"],function(varname,expr,scope){
-						
-					},2,true);
-					
-					
-					/* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
+                    globaltable.define(["setitem"],function(index,list,value){
+                        // TODO wordorlist
+                        if(index <= list.length){
+
+                        }
+                        if(value == list)
+                        {
+                            // TODO Circular list? Copy first
+                        }
+                        list[index-1] = value;
+                        return list;
+                    });
+
+                    // MISIING setbutfirst,array mutation
+
+                    // Predicates
+
+                    globaltable.define(["wordp","word?"],function(word){
+                        if(ltype(word) == "word")
+                        {
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    });
+
+                    globaltable.define(["listp","list?"],function(word){
+                        if(ltype(word) == "list")
+                        {
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    });
+
+                    globaltable.define(["emptyp","empty?"],function(word){
+                        if(ltype(word) == "word")
+                        {
+                            if(word == "")
+                            {
+                                return true;
+                            }
+                        }else if(ltype(word) == "list"){
+                            if(word == [])
+                            {
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
+
+                    globaltable.define(["equalp","equal?"],function(a,b){
+
+                        if(a == b)
+                        {
+                            return true;
+                        }
+                        return false;
+                    });
+                    // TODO beforep
+                    // MISSING .eq (no nodes in js)
+
+                    globaltable.define(["memberp","member?"],function(thing1,thing2){
+                        // Using indexof
+                        if(thing2.indexof(thing2) != -1)
+                        {
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    globaltable.define(["numberp","number"],function(x){
+                        if(!isNan(x) && x != "")
+                        {
+                            return true;
+                        }
+                        // TODO Might not be correct ... ?
+                    });
+                    // MISSING backslashedp
+
+                    // Queries
+                    globaltable.define(["count"],function(wordorlist){
+                        // TODO Type Checking (wordorlist)
+                        return wordorlist.length;
+                    });
+                    globaltable.define(["ascii"],function(char){
+                        if(ltype(char) != "word")
+                        {
+                            // TODO Throw Type Error
+                        }
+                        if(char.length != 1)
+                        {
+                            // TODO Throw length error (return 0)
+                        }
+                        return char[0].charCodeAt(0);
+                    });
+                    // MISSING rawascii
+                    globaltable.define(["char"],function(x){
+                        // TODO Type-check: x is Int
+                        return String.fromCharCode(x);
+                    });
+
+                    globaltable.define(["member"],function(thing1,thing2){
+                        // TODO Implementation
+                    });
+
+                    globaltable.define(["lowercase"],function(word){
+                        if(ltype(word) != "word")
+                        {
+                            // TODO Raise an error
+                        }
+                        return word.toLowerCase();
+                    });
+
+                    globaltable.define(["uppercase"],function(word){
+                        if(ltype(word) != "word")
+                        {
+                            // TODO Raise an error
+                        }
+                        return word.toUpperCase();
+                    });
+
+                    // Missing parse
+                    // Missing standout
+                    // Missing runparse
+
+                    // TODO Transmitters
+
+                    // Recievers
+                    globaltable.define(["readlist","rl"],function(){
+                        var result = prompt("Please enter a list", "");
+                        // TODO Parse the list
+                    });
+
+                    globaltable.define(["readword","rw"],function(){
+                        var result = prompt("Please enter a word", "");
+                        return result;
+                    });
+
+                    globaltable.define(["readchar","rc"],function(){
+                        var result = prompt("Please enter a character", "");
+                        // TODO Parse the list
+
+                        return result[0];
+                    });
+
+                    // TODO readchars
+
+                    // TODO FILEACCESS (Using ajax???)
+
+                    // TODO Terminal Access
+
+                    // Arithmetic
+
+                    globaltable.define(["sum"],function(a,b)
+                                       {
+                        var result = 0;
+                        if(arguments.length != 2)
+                        {
+                            // TODO 
+                        }
+                        for(var index = 0;index<arguments.length;index++)
+                        {
+                            var input = arguments[index];
+                            var number = parseNum(input);
+                            if(number === false) // Type Checking, because 0 might be evaluated as false
+                            {
+                                // TODO Throw numerror
+                            }
+                            result += number;
+                        }
+                        return result;
+                    },-1);
+
+                    globaltable.define(["difference"],function(a,b){
+                        if(!a || !b)
+                        {
+                            // TODO die with error
+                        }
+                        var num1 = parseNum(a);
+                        var num2 = parseNum(b);
+
+                        if(a === false)
+                        {
+                            // TODO Throw an error
+                        }
+                        if(b === false || b == 0) // Check for b = 0 --> 
+                        {
+                            // TODO Throw an error
+                        }
+                        return a-b;
+                    });
+                    // TODO Type checking in product
+                    globaltable.define(["product"],function(a,b){
+                        var result = parseNum(arguments[0]);
+                        if(!a && !b)
+                        {
+                            return 1;
+                        }
+                        if(arguments.length == 2)
+                        {
+                            return a*b;
+                        }
+                        for(var index = 1;index<arguments.length;index++)
+                        {
+                            var input = arguments[index];
+                            var number = parseNum(input);
+                            if(number === false) // Type Checking, because 0 might be evaluated as false
+                            {
+                                // TODO Throw numerror
+                            }
+                            result *= number;
+                        }
+                        return result;
+                    },-1);
+
+                    globaltable.define(["quotient"],function(a,b){
+                        var num1 = parseNum(arguments[0]);
+                        var num2 = parseNum(arguments[1]);
+                        if(num1 === false || num2 === false)
+                        {
+                            // TODO Throw an error	
+                        }
+                        if(arguments.length != 2)
+                        {
+                            // Check for 
+                        }
+
+                        return num1/num2;
+                    },-1);
+
+                    globaltable.define(["modulo"],function(a,b){
+                        if(!a || !b)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+                        var num2;
+                        // Check if this works
+                        if(num2 = parseNum(b) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        return ((num2 % num1) + num1) % num1;
+                    });
+
+                    globaltable.define(["remainder"],function(a,b){
+                        if(!a || !b)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+                        var num2;
+                        // Check if this works
+                        if(num2 = parseNum(b) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        return num1%num2;
+                    });
+
+
+                    globaltable.define(["int"],function(a){
+                        if(!a)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        return ~~num1;
+                    });
+
+                    globaltable.define(["round"],function(a){
+                        if(!a)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        return Math.round(num1);
+                    });			
+
+                    globaltable.define(["sqrt"],function(a){
+                        if(!a)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        if(num1 < 0)
+                        {
+                            // Throw an error
+                        }
+                        return Math.sqrt(num1);
+                    });
+
+                    globaltable.define(["round"],function(a,b){
+                        if(!a || !b)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        var num2;
+                        // Check if this works
+                        if(num2 = parseNum(b) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        return Math.pow(num1,num2);
+                    });
+
+                    globaltable.define(["exp"],function(a){
+                        if(!a)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        if(num1 < 0)
+                        {
+                            // Throw an error
+                        }
+                        return Math.exp(num1);
+                    });
+                    // MISSING log10
+                    globaltable.define(["ln"],function(a){
+                        if(!a)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        if(num1 < 0)
+                        {
+                            // Throw an error
+                        }
+                        return Math.log(num1);
+                    });
+
+                    globaltable.define(["sin"],function(a){
+                        if(!a)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        if(num1 < 0)
+                        {
+                            // Throw an error
+                        }
+                        return Math.sin(num1);
+                    });
+
+                    // Missing radsin
+
+                    globaltable.define(["cos"],function(a){
+                        if(!a)
+                        {
+                            // TODO argerror
+                        }
+                        var num1;
+                        // Check if this works
+                        if(num1 = parseNum(a) === false)
+                        {
+                            // TODO numerror
+                        }
+
+                        if(num1 < 0)
+                        {
+                            // Throw an error
+                        }
+                        return Math.cos(num1);
+                    });
+                    // Missing radcos
+                    // Missing arctan
+                    // Missing ractarn
+
+                    // PREDICATES
+                    globaltable.define(["lessp","less?"],function(a,b){
+                        if(!a || !b)
+                        { /* error */ }
+                        if(a<b)
+                        {
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    globaltable.define(["greaterp","greater?"],function(a,b){
+                        if(!a || !b)
+                        { /* error */ }
+                        if(a>b)
+                        {
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    globaltable.define(["random"],function(highest){
+                        var num_highest;
+                        if((num_highest = parseNum(highest)) == false)
+                        {
+                            // TODO dye with error
+                        }
+                        return Math.floor((Math.random() * num_highest)); 
+                    });
+
+                    // MISSING rerandom
+                    // MISSING form
+                    globaltable.define(["form"],function(num,nwidth,precision){
+
+                    });
+
+                    // MISSING bitand,bitor,bitxor,bitnot,ashift,lshift
+
+                    globaltable.define(["and"],function(){
+                        var args = arguments;
+                        for(var index = 0;index<args.length;index++)
+                        {
+                            if(args[index] != "true") // TODO Type converting
+                            {
+                                return false;	
+                            }	
+                        }
+                        return true;
+                    },-1);
+
+                    globaltable.define(["or"],function(){
+                        var args = arguments;
+                        for(var index = 0;index < args.length;index++)
+                        {
+                            if(args[index] == "true")
+                            {
+                                return true;	
+                            }	
+                        }
+                        return false;
+                    },-1);
+
+                    globaltable.define(["not"],function(tfexpr){
+                        if(tfexpr == "true")
+                        {
+                            return false;	
+                        }	
+
+                        if(tfexpr == false)
+                        {
+                            return true;	
+                        }
+                    });
+
+                    globaltable.define(["make"],function(varname,expr,scope){
+
+                    },2,true);
+
+
+                    /* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
 					 * GET ACCESS TO VARIABLES
 					 */
-					 
-					
-				</script>
 
-			</div>
 
-			<footer>
-			</footer>
-		</div>
-	</body>
+                </script>
+
+            </div>
+
+            <footer>
+            </footer>
+        </div>
+    </body>
 </html>
