@@ -32,23 +32,69 @@ Remove this if you use the .htaccess -->
                 <!-- INTERPRETER GOES HERE -->
                 <script>
                     // Scoping model
-                    function scopeobj(globscope,oldscope)
+                    function scopeobj()
                     {
-
+                        // Aufbau: [name,[wert1,wer2,...]]
                         this.vars = [];
-
-                        this.set = function(varname,expr)
+                        this.createvar = function()
                         {
-                            this.vars[varname] = expr;
+                            for(var index=0;index<this.vars.length;index++)
+                            {
+                                if(this.vars[index][0] == varname)
+                                {
+                                    return; // Variable already exists
+                                }
+                            }
+                            
+                            this.vars[this.vars.length] = [varname,[]];
                         };
-
-                        this.get = function(varname)
+                        
+                        this.setvar = function(varname,val)
                         {
-                            return this.vars[varname];
-                        }
-
-                    };
-
+                            // Check if variable exists
+                            for(var index=0;index<this.vars.length;index++)
+                            {
+                                if(this.vars[index][0] == varname)
+                                {
+                                    // Found it => set it
+                                    this.vars[index][1][this.vars[index][1].length] = val;
+                                    return;
+                                }
+                            }
+                            
+                            // Variable hasn't been found
+                            this.vars[this.vars.length] = [varname,[val]];
+                        };
+                        
+                        this.setglobal = function(varname,val)
+                        {
+                            // Check if var exists
+                            for(var index=0;index<this.vars.length;index++)
+                            {
+                                if(this.vars[index][0] == varname)
+                                {
+                                    // Found it => set it
+                                    this.vars[index][1] = [val];
+                                    return "succ";
+                                }
+                            }
+                            this.vars[this.vars.length] = [varname,[val]];
+                            return "succ";
+                        };
+                        
+                        this.getval = function(varname)
+                        {
+                            for(var index=0;index<this.vars.length;index++)
+                                {
+                                    if(this.vars[index][0] == varname)
+                                    {
+                                        // Found it => set it
+                                        
+                                        return this.vars[index][1][this.vars[index][1].length-1];
+                                    }
+                                }
+                            }
+                    }
                     // Handling for tab in textarea
                     $("textarea").keydown(function(e) {
                         if(e.keyCode === 9) { // tab was pressed
@@ -100,7 +146,7 @@ Remove this if you use the .htaccess -->
 							alert(code);
 							*/
                         }
-                        this.globalscope = new scopeobj([]);
+                        this.globalscope = new scopeobj();
                         this.run = function(code,scope)
                         {
                             if(!scope)
@@ -108,10 +154,22 @@ Remove this if you use the .htaccess -->
                                 scope = new scopeobj([]);
                             }
                             // Get next func call
+                            var i = 0;
                             var run = this.get_next_eval(code);
-                            console.log("RUNNABEL",run);
-                            this.runit(run[1],scope);
-
+                            while(run[1] != [])
+                            {
+                                this.runit(run[1],scope);
+                                if(i == 10)
+                                {
+                                    return;
+                                }
+                                //console.log("RUNNABEL",run);
+                                for(var i = 0;i<run[0];i++)
+                                    code.shift();
+                                i ++;
+                                run = this.get_next_eval(code);
+                                
+                            }
                         };
                         this.runit = function(code,scope)
                         {
@@ -121,16 +179,16 @@ Remove this if you use the .htaccess -->
                                 console.log("The result is",code[0]);
                                 return;	
                             }
-                            console.log("Recieved code:",code);
+                            //console.log("Recieved code:",code);
                             if(!code)
                             {
-                                alert("Code is missing");	
+                                //alert("Code is missing");	
                             }
                             // 1 st to
                             var callarray = []; 
                             for(var index = code.length-1;index >= 0;index --)
                             {
-                                console.log(code[index]);
+                                //console.log(code[index]);
                                 if(!this.isproc_orfunc(code[index]))
                                 {
                                     callarray.unshift(code[index]);	
@@ -141,12 +199,12 @@ Remove this if you use the .htaccess -->
                                     //alert(code[index-1]);
                                     if(code[index-1] == "<multiarg>")
                                     {
-                                        console.log("Could this be mutiarg?");
+                                        //console.log("Could this be mutiarg?");
                                         multiarg = true;	
                                     }else{
-                                        console.log("No multiarg:"+code[index]);	
+                                        //console.log("No multiarg:"+code[index]);	
                                     }
-                                    console.log(multiarg);
+                                    //console.log(multiarg);
                                     callarray.unshift(code[index]); // Add funcname to array
                                     if(multiarg == false)
                                     {
@@ -166,13 +224,14 @@ Remove this if you use the .htaccess -->
                                             callarray.splice(callarray.indexOf("<endmultiarg>"));
                                             // Lets also remove it from "newcode"
                                             code.splice(callarray.length+index-1,1);
+                                           
                                         }
                                     }
-                                    console.log("Going to call "+callarray);
+                                    //console.log("Going to call "+callarray);
                                     var result = this.exec(callarray); // Executed code stored in array
-                                    console.log("The result was: "+result );
+                                    //console.log("The result was: "+result );
                                     // Change
-                                    console.log(code);
+                                    //console.log(code);
                                     var newcode = [];
                                     for(var i = 0;i < code.length;i ++)
                                     {
@@ -191,7 +250,10 @@ Remove this if you use the .htaccess -->
                                         }
                                     }
 
-
+                                    if(newcode[newcode.length-1] == "<endmultiarg>" && newcode.length == 2)
+                                    {
+                                        newcode.pop();
+                                    }
                                     //console.log(newcode);
                                     // Generated call array correctly
                                     // Don't do more :-)
@@ -226,6 +288,7 @@ Remove this if you use the .htaccess -->
                                         {
                                             alert("SCOPING FUNCTION");	
                                         }
+                                        call[call.length] = this.globalscope;
                                         return(this.primitives[index][1].apply(null,call));
                                     }
                                 }	
@@ -274,7 +337,12 @@ Remove this if you use the .htaccess -->
                                         {
                                             multivar --;
                                         }
-                                        if(this.isproc_orfunc(code[index]))
+                                        if(code[0] == "<multiarg>" && multivar == 0 && code[index] == "<endmultiarg>") 
+                                        {
+                                            callarrray[callarrray.length] = code[index];
+                                            return [index+1,callarrray];
+                                        }
+                                        if(this.isproc_orfunc(code[index]) && code[index-1] != "<multiarg>")
                                         {
                                             funcarity += this.getfuncorprocarity(code[index]);
                                         }
@@ -1658,9 +1726,17 @@ Remove this if you use the .htaccess -->
                     });
 
                     globaltable.define(["make"],function(varname,expr,scope){
-
+                        if(scope.setglobal(varname,expr) != "succ")
+                            alert("ERROR WHILE SETTING VARIABLE");
                     },2,true);
-
+                    
+                    globaltable.define(["thing"],function(varname,scope){
+                        return scope.getval(varname);
+                    },1,true);
+                    
+                    globaltable.define(["print"],function(val){
+                        console.log("LOGO WRITES:"+val);
+                    });
 
                     /* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
 					 * GET ACCESS TO VARIABLES
