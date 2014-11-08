@@ -330,18 +330,43 @@ Remove this if you use the .htaccess -->
                             for(var index = 0; index<code.length;index++)
                             {
                                 // First check if index is + - * / 
-                                if(code[index] == "+" || code[index] == "-" || code[index] == "*" || code[index] == "/" && parseNum(code[index-1]) !== false && parseNum(code[index+1]) !== false)
+                                if(code[index] == "+" || code[index] == "-" || code[index] == "*" || code[index] == "/"  && parseNum(code[index-1]) !== false && parseNum(code[index+1]) !== false || code[index] == "MINUS")
                                 {
+                                    
+                                    alert(code[index]);
                                     var oldindex = index;
                                     // Begin
-                                    var infixtokens = [code[index-1]];
-                                    while(code[index] == "+" || code[index] == "-" || code[index] == "*" || code[index] == "/" || parseNum(code[index]) !== false)
+                                    if(code[index] != "MINUS")
                                     {
+                                        var infixtokens = [code[index-1]];
+                                    }
+                                    else
+                                    {
+                                        var infixtokens = [];
+                                        oldindex++;
+                                        
+                                    }
+                                    var nextnum = false;
+                                    
+                                    while(code[index] == "+" || code[index] == "-" || code[index] == "*" || code[index] == "/" || code[index] == "MINUS" || parseNum(code[index]) !== false)
+                                    {
+                                        // Check if nextnum status is correct
+                                        if(nextnum == false && parseNum(code[index]) !== false)
+                                        {
+                                            // Return 
+                                            
+                                            break;
+                                        }
+                                        if(code[index] != "MINUS")
+                                        {
+                                            nextnum = !nextnum;
+                                        }
                                         infixtokens[infixtokens.length] = code[index];
                                         index++;
                                         
                                     }
                                     code = code.slice(0,oldindex-1).concat(this.parseinfix(infixtokens)).concat(code.slice(index,code.length));
+                                    alert("toki: "+infixtokens);
                                     alert(this.parseinfix(infixtokens));
                                 }
                             }
@@ -1312,6 +1337,18 @@ Remove this if you use the .htaccess -->
                         }
                         return a-b;
                     });
+                    
+                    globaltable.define(["MINUS"],function(a){
+                        if(!a)
+                        {
+                            // TODO die with error
+                        }
+                        var num1 = parseNum(a);
+
+                        
+                        return 0-a;
+                    });
+                    
                     // TODO Type checking in product
                     globaltable.define(["product"],function(a,b){
                         var result = parseNum(arguments[0]);
