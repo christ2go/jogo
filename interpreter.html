@@ -242,7 +242,7 @@ Remove this if you use the .htaccess -->
                                     var newcode = [];
                                     for(var i = 0;i < code.length;i ++)
                                     {
-                                        if(i>index && i<=index+callarray.length-1)
+                                        if(i>index && i<=index+callarray.length)
                                         {
                                         } 
                                         else if(multiarg && i == index-1 || multiarg && i+1 == index )
@@ -1334,7 +1334,7 @@ Remove this if you use the .htaccess -->
                             return true;
                         }
                         return false;
-                    });
+                    },2);
                     // TODO beforep
                     // MISSING .eq (no nodes in js)
 
@@ -1818,6 +1818,11 @@ Remove this if you use the .htaccess -->
                         return scope.getval(varname);
                     },1,true,false);
                     
+                    
+                    /*
+                     *  CONTROL STRUCTURE FUNCTIONS
+                     *
+                     */
                     globaltable.define(["if"],function(tfxpr,runlist,interp){
                         console.log(arguments);
                         interp.evaluate(runlist.join(" "));
@@ -1827,11 +1832,12 @@ Remove this if you use the .htaccess -->
                         console.log(arguments);
                         interp.evaluate(runlist.join(" "));
                     },3,false,true);
-                    /*
-                     *  CONTROL STRUCTURE FUNCTIONS
-                     *
-                     */
-
+                              
+                    // WHILE LOOP
+                              
+                    // FOR LOOP
+                    
+                        // *NEW FOR LOOP*
                     
                     function is_poperand(token)
                     {
