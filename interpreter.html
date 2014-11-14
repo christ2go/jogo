@@ -543,7 +543,7 @@ Remove this if you use the .htaccess -->
                                 }	
 
                             }
-                            alert("parsed: "+code);
+                            alert("!!parsed: "+code);
 
                             return code; // Parsing complete 
                         }
@@ -1799,7 +1799,7 @@ Remove this if you use the .htaccess -->
                             console.log(val.join(" "));
                             return;
                         }
-                        val = val.toString();
+                        val +="";
                         console.log("LOGO WRITES:"+val);
                     });
                     
@@ -1819,8 +1819,18 @@ Remove this if you use the .htaccess -->
                     },1,true,false);
                     
                     globaltable.define(["if"],function(tfxpr,runlist,interp){
-                        alert(interp);
+                        console.log(arguments);
+                        interp.evaluate(runlist.join(" "));
                     },2,false,true);
+                    
+                    globaltable.define(["ifelse"],function(tfxpr,runlist,elserun,interp){
+                        console.log(arguments);
+                        interp.evaluate(runlist.join(" "));
+                    },3,false,true);
+                    /*
+                     *  CONTROL STRUCTURE FUNCTIONS
+                     *
+                     */
 
                     
                     function is_poperand(token)
