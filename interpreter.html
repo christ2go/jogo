@@ -8,7 +8,7 @@
 Remove this if you use the .htaccess -->
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-        <title>interpreter</title>
+        <title>Logo in your browser</title> 
         <meta name="description" content="">
         <meta name="author" content="">
 
@@ -27,7 +27,7 @@ Remove this if you use the .htaccess -->
             <nav></nav>
 
             <div>
-                <textarea id="mycode"></textarea><br />
+                <textarea id="mycode" width="750" height="200"></textarea><br />
                 <button type="submit" id="codesubmit">Absenden</button>
                 <!-- INTERPRETER GOES HERE -->
                 <script>
@@ -84,15 +84,20 @@ Remove this if you use the .htaccess -->
                         
                         this.getval = function(varname)
                         {
+                            varname = varname.toLowerCase();
                             for(var index=0;index<this.vars.length;index++)
                                 {
                                     if(this.vars[index][0] == varname)
                                     {
-                                        // Found it => set it
-                                        
-                                        return this.vars[index][1][this.vars[index][1].length-1];
+                                        // Found it =>  it
+                                        // Return a COPY(!)
+                                        var element = this.vars[index][1][this.vars[index][1].length-1];
+                                        if(ltype(element) == "list")
+                                            return element.slice(0);
+                                        return element;
                                     }
                                 }
+                            // Variable not found
                             }
                     }
                     // Handling for tab in textarea
@@ -135,7 +140,7 @@ Remove this if you use the .htaccess -->
                         {
                             // Main Interpreter function, used for evaluating the code
                             var code = this.parse_code(code);
-                            alert(code);
+                            alert(">>>"+code);
                             this.run(code);
                             /*
 							var teste;
@@ -168,6 +173,8 @@ Remove this if you use the .htaccess -->
                                     code.shift();
                                 i ++;
                                 run = this.get_next_eval(code);
+                                if(run == undefined)
+                                    break;
                                 
                             }
                         };
@@ -176,7 +183,7 @@ Remove this if you use the .htaccess -->
                             //alert(">>",code);
                             if(code.length == 1)
                             {
-                                console.log("The result is",code[0]);
+                                //console.log("The result is",code[0]);
                                 return;	
                             }
                             //console.log("Recieved code:",code);
@@ -228,18 +235,19 @@ Remove this if you use the .htaccess -->
                                         }
                                     }
                                     //console.log("Going to call "+callarray);
-                                    var result = this.exec(callarray); // Executed code stored in array
+                                    var result = this.exec(callarray,scope); // Executed code stored in array
                                     //console.log("The result was: "+result );
                                     // Change
                                     //console.log(code);
                                     var newcode = [];
                                     for(var i = 0;i < code.length;i ++)
                                     {
-                                        if(i>index && i<=index+callarray.length)
+                                        if(i>index && i<=index+callarray.length-1)
                                         {
                                         } 
                                         else if(multiarg && i == index-1 || multiarg && i+1 == index )
                                         {
+                                            
                                         }
                                         else if(i == index){
                                             newcode[newcode.length] = result;	
@@ -268,13 +276,27 @@ Remove this if you use the .htaccess -->
                             // Find the function (if exists, else eval in new env or if macro eval in old env)
                             //this.primitives[this.primitives.length] = [funcnames,fn,fnarity];
 
-                            for(var index = 1;index<call.length;index++)
+                            for(var index = 0;index<call.length;index++)
                             {
+                                var element = call[index];
+                                if(!call[index])
+                                    break;
                                 if(call[index][0] == "\"")
                                 {
                                     call[index] = call[index].substr(1);	
-                                }	
                             }
+                                if(call[index][0] == ":")
+                                {
+                                    var name = element.substr(1);
+                                    call[index] = this.globalscope.getval(element.substr(1));
+
+                                    
+                                }
+                            }
+                            
+                            
+                            
+                            
                             //alert(call);
                             // TODO Lowercase
                             for(var index = 0;index<this.primitives.length;index++)
@@ -283,16 +305,23 @@ Remove this if you use the .htaccess -->
                                 {
                                     if(this.primitives[index][0][index_2] == call[0])
                                     {
+                                        var prname = call[0];
                                         call.shift();
                                         if(this.primitives[index][3] == true)
                                         {
-                                            alert("SCOPING FUNCTION");	
+                                            call[call.length] = this.globalscope;
+                                            
                                         }
-                                        call[call.length] = this.globalscope;
+                                        if(this.primitives[index][4] == true)
+                                        {
+                                            call[call.length] = this;
+                                        
+                                        }
+                                        //console.log("Calling "+prname+" "+call);
                                         return(this.primitives[index][1].apply(null,call));
-                                    }
                                 }	
                             }
+                        }
                         }
                         this.get_next_eval = function(code)
                         {
@@ -395,48 +424,51 @@ Remove this if you use the .htaccess -->
                             // Booleans CAN ONLY be parsed correctly at execution time
                             code = this.multiargparans(code);
                             alert(code);
+                            
                             for(var index = 0; index<code.length;index++)
                             {
-                                // First check if index is + - * / 
-                                if(code[index] == "+" || code[index] == "-" || code[index] == "*" || code[index] == "/"  && parseNum(code[index-1]) !== false && parseNum(code[index+1]) !== false || code[index] == "MINUS")
+                                var oldindex = index;
+                                var infixtokens = [];
+                                var exspectnum = true;
+                                while(is_poperand(code[index]))
                                 {
+                                    var isnum = false, isop =false , isnoch = false ;
                                     
-                                    alert(code[index]);
-                                    var oldindex = index;
-                                    // Begin
-                                    if(code[index] != "MINUS")
+                                    if(parseNum(code[index]) !== false)
+                                        isnum = true;
+                                    if(code[index] == "(" || code[index] == ")" || code[index] == "MINUS"  )
+                                        isnoch = true;
+                                    if(code[index] == "+" || code[index] == "-" || code[index] == "*"  || code[index] == "/" )
+                                        isop = true;
+                                    
+                                    if(isnoch && infixtokens.length !=1)
                                     {
-                                        var infixtokens = [code[index-1]];
+                                        infixtokens.push(code[index]);
+                                    }
+                                    else if(isnum && exspectnum || isop && !exspectnum)
+                                    {
+                                        infixtokens.push(code[index]);
+                                        exspectnum = (!exspectnum);
                                     }
                                     else
                                     {
-                                        var infixtokens = [];
-                                        oldindex++;
-                                        
+                                        if(infixtokens.lenght > 1)
+                                            index--;
+                                        break;   
                                     }
-                                    var nextnum = false;
+                                    index++;
                                     
-                                    while(code[index] == "+" || code[index] == "-" || code[index] == "*" || code[index] == "/" || code[index] == "MINUS" || parseNum(code[index]) !== false)
-                                    {
-                                        // Check if nextnum status is correct
-                                        if(nextnum == false && parseNum(code[index]) !== false)
-                                        {
-                                            // Return 
-                                            
-                                            break;
-                                        }
-                                        if(code[index] != "MINUS")
-                                        {
-                                            nextnum = !nextnum;
-                                        }
-                                        infixtokens[infixtokens.length] = code[index];
-                                        index++;
-                                        
-                                    }
-                                    code = code.slice(0,oldindex-1).concat(this.parseinfix(infixtokens)).concat(code.slice(index,code.length));
-                                    alert("toki: "+infixtokens);
-                                    alert(this.parseinfix(infixtokens));
+                                    
+                                    
+                                    
                                 }
+                                //console.log("Tokens: ",this.parseinfix(infixtokens),oldindex,index);
+                                if(oldindex+1 == index)
+                                {
+                                    continue;
+                                }
+                                                                    code = code.slice(0,oldindex).concat(this.parseinfix(infixtokens)).concat(code.slice(index,code.length));
+
                             }
                             
                             for(var index=0;index<code.length;index++)
@@ -445,6 +477,36 @@ Remove this if you use the .htaccess -->
                                 if(code[index] == "*") {code[index] = "product";}
                                 if(code[index] == "/") {code[index] = "quotient";}
                                 if(code[index] == "-") {code[index] = "difference";}
+                            }
+                            for(var index = 0;index<code.length;index++)
+                            {
+                                if(code[index] == "=")
+                                {
+                                    // Check answap
+                                    if(code[index-1] == "<endmultiarg>")
+                                    {
+                                        alert(code[index]);
+                                        var margs = 1;
+                                        for(var i = index-1;i>0;i--)
+                                        {
+                                            var token = code[i];
+                                            if(token == "<multiarg>")
+                                            {
+                                                // Swap
+                                                margs--;
+                                                if(margs == 0)
+                                                {
+                                                    //code[index] == ""
+                                                    alert("marg:"+code[index]);
+                                                }
+                                            }
+                                            if(token == "<endmultiarg>")
+                                            {
+                                                marg++;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             // TODO Parse macros
                             var inproc = false;
@@ -480,7 +542,9 @@ Remove this if you use the .htaccess -->
                                     procdef[2][procdef[2].length] = code[index];	
                                 }	
 
-                            }	
+                            }
+                            alert("parsed: "+code);
+
                             return code; // Parsing complete 
                         }
                         this.isspecialtoken = function(token,check)
@@ -496,7 +560,7 @@ Remove this if you use the .htaccess -->
                         {
                             for(index = 0;index<code.length;index++)
                             {
-                                if(code[index] == "(")
+                                if(code[index] == "(" && parseNum(code[index+1]) == "false")
                                 {
                                     if(parseNum(code[index]) === false)
                                     {
@@ -637,7 +701,7 @@ Remove this if you use the .htaccess -->
                             for (var index = 0; index < stringel.length; index++) {
 
                                 var element = stringel[index];
-                                if (element == "]" && calledfromlist == true && escaped == false) {
+                                if (element == "]" && calledfromlist == true && escaped == false)                           {
                                     return [string, index-1];
                                 }
                                 if((element == "+" || element == "-" || element == "*" || element == "/" || element == "(" || element == ")")  && (parseNum(string) != false && calledfromlist == false ))
@@ -734,21 +798,18 @@ Remove this if you use the .htaccess -->
                             return [string, index];
                         };
                         this.primitives = [];
-                        this.define = function(funcnames,fn,fnarity,scope)
+                        this.define = function(funcnames,fn,fnarity,scope,interpobj)
                         {
                             // Function for defining functions
-                            if(!scope)
-                            {
-                                scope = false;	
-                            }
+                            
                             if(!fnarity)
                             {
                                 fnarity = fn.length; 
                             }
                             // TODO Check if funcname is already used
 
-                            this.primitives[this.primitives.length] = [funcnames,fn,fnarity,scope]; 
-                            console.log([funcnames,fn,fnarity]);
+                            this.primitives[this.primitives.length] = [funcnames,fn,fnarity,scope,interpobj]; 
+                            console.log(this.primitives[this.primitives.length-1]);
                         };
                         this.langalt = function(funcname,name,lang)
                         {
@@ -822,6 +883,8 @@ Remove this if you use the .htaccess -->
                         };
                         this.parseinfix = function(array)
                         {
+                            if(array.length < 3)
+                                return array;
                             array.reverse;
                             stack = []; // Stack
                             prefixlist = []; // List with commands
@@ -930,11 +993,11 @@ Remove this if you use the .htaccess -->
                         {
                             if(operator == "^" || operator == "$") {return 7;}
                             if(operator ==  "*" ){return 6;}
-                            if(operator ==  "/" ){return 5;}
+                            if(operator ==  "/" ){return 6;}
                             if(operator ==  "+" ){return 4;}
-                            if(operator ==  "-" ){return 3;}
-                            if(operator ==  "(" ){return 2;}
-                            if(operator ==  ")" ){return 1;}
+                            if(operator ==  "-" ){return 4;}
+                            if(operator ==  "(" ){return 10;}
+                            if(operator ==  ")" ){return 10;}
                         }
 
                         this.translate = function(lang,engname,gername)
@@ -1424,9 +1487,12 @@ Remove this if you use the .htaccess -->
                         {
                             return 1;
                         }
+                        
                         if(arguments.length == 2)
                         {
-                            return a*b;
+                            
+                            return  (parseNum(a)*parseNum(b)).toString();
+                            
                         }
                         for(var index = 1;index<arguments.length;index++)
                         {
@@ -1454,7 +1520,7 @@ Remove this if you use the .htaccess -->
                         }
 
                         return num1/num2;
-                    },-1);
+                    },2);
 
                     globaltable.define(["modulo"],function(a,b){
                         if(!a || !b)
@@ -1534,11 +1600,12 @@ Remove this if you use the .htaccess -->
                         {
                             // TODO argerror
                         }
-                        var num1;
+                        var num1 = parseNum(a);
                         // Check if this works
-                        if(num1 = parseNum(a) === false)
+                        if(num1 === false)
                         {
                             // TODO numerror
+                            return 14;
                         }
 
                         if(num1 < 0)
@@ -1725,24 +1792,60 @@ Remove this if you use the .htaccess -->
                         }
                     });
 
-                    globaltable.define(["make"],function(varname,expr,scope){
-                        if(scope.setglobal(varname,expr) != "succ")
-                            alert("ERROR WHILE SETTING VARIABLE");
-                    },2,true);
-                    
-                    globaltable.define(["thing"],function(varname,scope){
-                        return scope.getval(varname);
-                    },1,true);
                     
                     globaltable.define(["print"],function(val){
+                        if(ltype(val) == "list")
+                        {
+                            console.log(val.join(" "));
+                            return;
+                        }
+                        val = val.toString();
                         console.log("LOGO WRITES:"+val);
                     });
-
+                    
                     /* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
 					 * GET ACCESS TO VARIABLES
 					 */
+                    
+                    globaltable.define(["make"],function(varname,expr,scope){
+                        alert(varname +"=>"+ expr);
+                        if(scope.setglobal(varname,expr) != "succ")
+                            alert("ERROR WHILE SETTING VARIABLE");
+                    },2,true,false);
+                    
+                    
+                    globaltable.define(["thing"],function(varname,scope){
+                        return scope.getval(varname);
+                    },1,true,false);
+                    
+                    globaltable.define(["if"],function(tfxpr,runlist,interp){
+                        alert(interp);
+                    },2,false,true);
 
-
+                    
+                    function is_poperand(token)
+                    {
+                              if(token == "+"){return true;}
+                              if(token == "-"){return true;}
+                              if(token == "*"){return true;}
+                              if(token == "/"){return true;}
+                              if(token == "("){return true;}
+                              if(token == ")"){return true;}
+                              if(token == "MINUS"){return true;}
+                              if(parseNum(token) !== false)
+                              {
+                                return true;
+                              }
+                              return false;
+                    }
+                    
+                    function nochange(token)
+                    {
+                        if(token == "MINUS"){return true;}
+                        if(token == "("){return true;}
+                        if(token == ")"){return true;}
+                        return false;
+                    }
                 </script>
 
             </div>
