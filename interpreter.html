@@ -32,6 +32,7 @@ Remove this if you use the .htaccess -->
                 <!-- INTERPRETER GOES HERE -->
                 <script>
                     // Scoping model
+                    //window.alert = function() {};
                     function scopeobj()
                     {
                         // Aufbau: [name,[wert1,wer2,...]]
@@ -126,7 +127,7 @@ Remove this if you use the .htaccess -->
                     test = new logointerpreter();
 
                     $("#codesubmit").click(function(){
-                        var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm," ").replace("\t"," ");
+                        var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm,"").replace("\t"," ");
                         console.log(test.evaluate(code));
                         //console.log((test.parseinfix(me)));
                     });
@@ -141,7 +142,7 @@ Remove this if you use the .htaccess -->
                             // Main Interpreter function, used for evaluating the code
                             var code = this.parse_code(code);
                             alert(">>>"+code);
-                            this.run(code);
+                             return this.run(code)[0];
                             /*
 							var teste;
 							teste = this.get_next_eval(code);
@@ -163,19 +164,17 @@ Remove this if you use the .htaccess -->
                             var run = this.get_next_eval(code);
                             while(run[1] != [])
                             {
-                                this.runit(run[1],scope);
-                                if(i == 10)
-                                {
-                                    return;
-                                }
+                                var result = this.runit(run[1],scope);
                                 //console.log("RUNNABEL",run);
                                 for(var i = 0;i<run[0];i++)
                                     code.shift();
                                 i ++;
                                 run = this.get_next_eval(code);
                                 if(run == undefined)
-                                    break;
-                                
+                                {
+                                    return result;
+                                    
+                                }
                             }
                         };
                         this.runit = function(code,scope)
@@ -183,8 +182,7 @@ Remove this if you use the .htaccess -->
                             //alert(">>",code);
                             if(code.length == 1)
                             {
-                                //console.log("The result is",code[0]);
-                                return;	
+                                return code;	
                             }
                             //console.log("Recieved code:",code);
                             if(!code)
@@ -288,6 +286,7 @@ Remove this if you use the .htaccess -->
                                 if(call[index][0] == ":")
                                 {
                                     var name = element.substr(1);
+                                    alert("VARAIABLE "+name);
                                     call[index] = this.globalscope.getval(element.substr(1));
 
                                     
@@ -423,7 +422,7 @@ Remove this if you use the .htaccess -->
 
                             // Booleans CAN ONLY be parsed correctly at execution time
                             code = this.multiargparans(code);
-                            alert(code);
+                            alert("marg"+code);
                             
                             for(var index = 0; index<code.length;index++)
                             {
@@ -560,7 +559,7 @@ Remove this if you use the .htaccess -->
                         {
                             for(index = 0;index<code.length;index++)
                             {
-                                if(code[index] == "(" && parseNum(code[index+1]) == "false")
+                                if(code[index] == "(")
                                 {
                                     if(parseNum(code[index]) === false)
                                     {
@@ -646,6 +645,11 @@ Remove this if you use the .htaccess -->
 
                                 }
 
+                            }
+                            for(var index = 0;index<liste.length;index++)
+                            {
+                                if(liste[index] === "")
+                                    liste.splice(index, 1);
                             }
                             return [liste, i];
                             // Return statement
@@ -751,12 +755,6 @@ Remove this if you use the .htaccess -->
                                 calledfromlist = false;
                             }
 
-                            if (!ohneanfuehrungszeichen && stringel[0] != "\"") {
-                                // 
-                                stringel = "\"" + stringel;
-                                returnfromlist = true;
-                                // 
-                            }
                             var escaped = false;
 
                             // Used for parsing strings in Logo
@@ -1126,16 +1124,13 @@ Remove this if you use the .htaccess -->
                         }
                         var list = b;
                         var extra = a;
-                        if(list == extra){
-                            // TODO Zirkuläre Liste (warining / error)
-
-                        }
+                        console.log(a,b);
                         list.push(extra);
                         return list;
 
                     });
 
-                    globaltable.define(["fput"],function(a,b){
+                    globaltable.define(["lput"],function(a,b){
                         // n elements but at least 
                         if(!a || !b)
                         {
@@ -1148,6 +1143,7 @@ Remove this if you use the .htaccess -->
                         if(list == extra){
                             // TODO Zirkuläre Liste
                         }
+                        console.log(a,b);
                         list.push(extra);
                         return list;
 
@@ -1796,7 +1792,7 @@ Remove this if you use the .htaccess -->
                     globaltable.define(["print"],function(val){
                         if(ltype(val) == "list")
                         {
-                            console.log(val.join(" "));
+                            console.log(val);
                             return;
                         }
                         val +="";
@@ -1824,17 +1820,26 @@ Remove this if you use the .htaccess -->
                      *
                      */
                     globaltable.define(["if"],function(tfxpr,runlist,interp){
-                        console.log(arguments);
-                        interp.evaluate(runlist.join(" "));
+                        if(tfxpr == true)
+                            interp.evaluate(runlist.join(" "));
                     },2,false,true);
                     
                     globaltable.define(["ifelse"],function(tfxpr,runlist,elserun,interp){
-                        console.log(arguments);
-                        interp.evaluate(runlist.join(" "));
+                        if(tfxpr == true)
+                            interp.evaluate(runlist.join(" "));
+                        else
+                            interp.evaluate(elserun.join(" "));
                     },3,false,true);
                               
                     // WHILE LOOP
                               
+                    globaltable.define(["while"],function(tflist,runlist,interp){
+                        while(interp.evaluate(tflist.join(" ")))
+                        {
+                              interp.evaluate(runlist.join(" "));
+                              
+                        }
+                    },2,false,true);
                     // FOR LOOP
                     
                         // *NEW FOR LOOP*
