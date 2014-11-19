@@ -1855,6 +1855,7 @@ Remove this if you use the .htaccess -->
                     // WHILE LOOP
                               
                     globaltable.define(["while"],function(tflist,runlist,interp){
+                        console.log(tflist,runlist);
                         while(interp.evaluate(betterjoin(tflist)))
                         {
                               interp.evaluate(betterjoin(runlist));
@@ -1912,7 +1913,7 @@ Remove this if you use the .htaccess -->
                         }
                         if(depth != undefined)
                         {
-                              joined+" ]";
+                              joined = joined+" ]";
                         }
                         return joined;
                     }
