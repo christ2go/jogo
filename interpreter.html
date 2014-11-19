@@ -17,6 +17,10 @@ Remove this if you use the .htaccess -->
         <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
         <link rel="shortcut icon" href="/favicon.ico">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
     </head>
 
     <body>
@@ -650,6 +654,7 @@ Remove this if you use the .htaccess -->
                                 }
                                 else 
                                 {
+                                    
                                     liste[liste.length] = this.parseliststring(string.slice(i),true,true)[0];
                                     i += this.parseliststring(string.slice(i),true,true)[1];
 
@@ -765,7 +770,11 @@ Remove this if you use the .htaccess -->
                             if (!calledfromlist) {
                                 calledfromlist = false;
                             }
-
+                            
+                            if(stringel[0] == "\"")
+                            {
+                                string = "\"";
+                            }
                             var escaped = false;
 
                             // Used for parsing strings in Logo
@@ -1833,22 +1842,22 @@ Remove this if you use the .htaccess -->
                      */
                     globaltable.define(["if"],function(tfxpr,runlist,interp){
                         if(tfxpr == true)
-                            interp.evaluate(runlist.join(" "));
+                            interp.evaluate(betterjoin(runlist));
                     },2,false,true);
                     
                     globaltable.define(["ifelse"],function(tfxpr,runlist,elserun,interp){
                         if(tfxpr == true)
-                            interp.evaluate(runlist.join(" "));
+                            interp.evaluate(betterjoin(runlist));
                         else
-                            interp.evaluate(elserun.join(" "));
+                            interp.evaluate(betterjoin(elserun));
                     },3,false,true);
                               
                     // WHILE LOOP
                               
                     globaltable.define(["while"],function(tflist,runlist,interp){
-                        while(interp.evaluate(tflist.join(" ")))
+                        while(interp.evaluate(betterjoin(tflist)))
                         {
-                              interp.evaluate(runlist.join(" "));
+                              interp.evaluate(betterjoin(runlist));
                               
                         }
                     },2,false,true);
@@ -1880,16 +1889,32 @@ Remove this if you use the .htaccess -->
                         return false;
                     }
                               
-                    function betterjoin()
+                    function betterjoin(code,depth)
                     {
+                        if(depth != undefined)
+                        {
+                              var joined = "[";
+                        }else{
+                              var joined = "";
+                        }
                         // Just like join, but only for 
                         for(var index = 0;index < code.length; index++)
+                        {
                               if(ltype(code[index]) == "list")
                               {
+                                joined = joined + betterjoin(code[index],1);
                                 // Parse lists back into logo expressions and append
                               }else{
                                 // Just append the old stuff
+                                joined = joined+code[index]+" ";
+                                
                               }
+                        }
+                        if(depth != undefined)
+                        {
+                              joined+" ]";
+                        }
+                        return joined;
                     }
                 </script>
 
