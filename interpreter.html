@@ -610,17 +610,27 @@ Remove this if you use the .htaccess -->
 
                                 // Append parsed
                             }
+                            console.log(tokens);
                             return tokens;
                         };
 
                         this.parseliste = function(string) {
                             var liste = [];
                             // Array für die Liste selbst
-
+                            var nextelement = false;
                             for (var i = 1; i < string.length; i++) {
                                 element = string[i];
+                                if (element == " "  && nextelement)
+                                {
+                                    continue;
+                                }
+                                if((element != " ") && nextelement)
+                                {
+                                    nextelement = false;
+                                }
                                 if (element == " ") 
                                 {
+                                    continue;
                                     // Move on to next
 
                                 }
@@ -652,6 +662,7 @@ Remove this if you use the .htaccess -->
                                     liste.splice(index, 1);
                             }
                             return [liste, i];
+                            
                             // Return statement
 
                         };
@@ -1122,13 +1133,14 @@ Remove this if you use the .htaccess -->
                             // TODO Throw an error
 
                         }
+                        console.log(b);
                         var list = b;
                         var extra = a;
-                        console.log(a,b);
+                        //console.log(a,b);
                         list.push(extra);
                         return list;
 
-                    });
+                    },2);
 
                     globaltable.define(["lput"],function(a,b){
                         // n elements but at least 
@@ -1866,6 +1878,18 @@ Remove this if you use the .htaccess -->
                         if(token == "("){return true;}
                         if(token == ")"){return true;}
                         return false;
+                    }
+                              
+                    function betterjoin()
+                    {
+                        // Just like join, but only for 
+                        for(var index = 0;index < code.length; index++)
+                              if(ltype(code[index]) == "list")
+                              {
+                                // Parse lists back into logo expressions and append
+                              }else{
+                                // Just append the old stuff
+                              }
                     }
                 </script>
 
