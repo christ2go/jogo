@@ -36,7 +36,7 @@ Remove this if you use the .htaccess -->
                 <!-- INTERPRETER GOES HERE -->
                 <script>
                     // Scoping model
-                    //window.alert = function() {};
+                    window.alert = function() {};
                     function scopeobj()
                     {
                         // Aufbau: [name,[wert1,wer2,...]]
@@ -131,7 +131,6 @@ Remove this if you use the .htaccess -->
                     test = new logointerpreter();
 
                     $("#codesubmit").click(function(){
-                        var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm,"").replace("\t"," ");
                         console.log(test.evaluate(code));
                         //console.log((test.parseinfix(me)));
                     });
