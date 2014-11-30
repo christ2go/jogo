@@ -131,6 +131,7 @@ Remove this if you use the .htaccess -->
                     test = new logointerpreter();
 
                     $("#codesubmit").click(function(){
+                        var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm," ").replace("\t"," ");
                         console.log(test.evaluate(code));
                         //console.log((test.parseinfix(me)));
                     });
@@ -297,6 +298,15 @@ Remove this if you use the .htaccess -->
                             }
                             
                             
+                            // Check if it is a user defined procedure
+                            
+                            if(this.isprocedure(call[0]))
+                            {
+                                
+                                procedure = this.getprocedure(call[0]);
+                                console.log("CALLING "+procedure);
+                                return; // Add procedures return value
+                            }
                             
                             
                             //alert(call);
@@ -884,6 +894,30 @@ Remove this if you use the .htaccess -->
                             }
                             return undefined;
                         }
+                        this.isprocedure = function(prname)
+                        {
+                            // Check if it is a procedure
+                            for(var index = 0;index<this.procedures.length;index++)
+                            {
+                                if(this.procedures[index][0] == fname)
+                                {
+                                    return true;	
+                                }	
+                            }
+                            return false;
+                        }
+                        
+                        this.getprocedure = function(prname)
+                        {
+                            // Return the procedures code
+                            for(var index = 0;index<this.procedures.length;index++)
+                            {
+                                if(this.procedures[index][0] == fname)
+                                {
+                                    return this.procedures[index];	
+                                }	
+                            }
+                        }
                         this.is_function = function(funcname)
                         {
                             for(var index = 0;index<this.primitives.length;index++)
@@ -1118,7 +1152,7 @@ Remove this if you use the .htaccess -->
                             // TODO Throw an error
 
                         }
-                        var sentence = "";
+                        var sentence = "\"";
                         for(var argc = 0;argc<arguments.length;argc++)
                         {
                             if(ltype(arguments[argc]) == "list")
@@ -1906,13 +1940,16 @@ Remove this if you use the .htaccess -->
                                 // Parse lists back into logo expressions and append
                               }else{
                                 // Just append the old stuff
-                                joined = joined+code[index]+" ";
+                                if(index !== code.length-1)
+                                    joined = joined+code[index]+" ";
+                                else
+                                    joined = joined+code[index];
                                 
                               }
                         }
                         if(depth != undefined)
                         {
-                              joined = joined+" ]";
+                              joined = joined+"]";
                         }
                         return joined;
                     }
