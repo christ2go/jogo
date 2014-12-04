@@ -36,11 +36,12 @@ Remove this if you use the .htaccess -->
                 <!-- INTERPRETER GOES HERE -->
                 <script>
                     // Scoping model
-                    window.alert = function() {};
+                    //window.alert = function() {};
                     function scopeobj()
                     {
                         // Aufbau: [name,[wert1,wer2,...]]
                         this.vars = [];
+                        this.locals = [[]];
                         this.createvar = function()
                         {
                             for(var index=0;index<this.vars.length;index++)
@@ -56,6 +57,20 @@ Remove this if you use the .htaccess -->
                         
                         this.setvar = function(varname,val)
                         {
+                            // Check if variable is local
+                            for(var index = this.locals.length-1;index > 0;index--)
+                            {
+                                for(var i = 0;i<this.locals[index].length;i++)
+                                {
+                                    if(this.locals[index][i][0] == varname)
+                                    {
+                                        console.log(this.locals);
+                                        this.locals[index][i][1] = val;
+                                        console.log(this.locals);
+                                    }
+                                    return "succ";
+                                }
+                            }
                             // Check if variable exists
                             for(var index=0;index<this.vars.length;index++)
                             {
@@ -63,7 +78,7 @@ Remove this if you use the .htaccess -->
                                 {
                                     // Found it => set it
                                     this.vars[index][1][this.vars[index][1].length] = val;
-                                    return;
+                                    return "succ";
                                 }
                             }
                             
@@ -90,6 +105,14 @@ Remove this if you use the .htaccess -->
                         this.getval = function(varname)
                         {
                             varname = varname.toLowerCase();
+                            for(var index = 0;index<this.locals.length;index++)
+                            {
+                                for(var i = 0;i<this.locals[index].length;i++)
+                                {
+                                    if(this.locals[index][i][0] == varname)
+                                       return this.locals[index][i][1];
+                                }
+                            }
                             for(var index=0;index<this.vars.length;index++)
                                 {
                                     if(this.vars[index][0] == varname)
@@ -103,7 +126,25 @@ Remove this if you use the .htaccess -->
                                     }
                                 }
                             // Variable not found
-                            }
+                        }
+                        // Functions for introducing and leaving local scope
+                        this.newlocal = function()
+                        {
+                            this.locals[this.locals.length] = [];
+                        }
+                        this.leavelocal = function()
+                        {
+                            console.log(this.locals);
+                            this.locals.pop();
+                            console.log(this.locals);
+                        }
+                        
+                        this.addlocal = function(varname)
+                        {
+                            this.locals[this.locals.length-1][this.locals[this.locals.length - 1].length] = [varname,undefined];
+                            console.log(this.locals);
+                            
+                        }
                     }
                     // Handling for tab in textarea
                     $("textarea").keydown(function(e) {
@@ -184,7 +225,7 @@ Remove this if you use the .htaccess -->
                         this.runit = function(code,scope)
                         {
                             //alert(">>",code);
-                            if(code.length == 1)
+                            if(code.length == 1 && !this.isproc_orfunc(code[0]))
                             {
                                 return code;	
                             }
@@ -197,7 +238,7 @@ Remove this if you use the .htaccess -->
                             var callarray = []; 
                             for(var index = code.length-1;index >= 0;index --)
                             {
-                                //console.log(code[index]);
+                                console.log(code[index]);
                                 if(!this.isproc_orfunc(code[index]))
                                 {
                                     callarray.unshift(code[index]);	
@@ -229,14 +270,13 @@ Remove this if you use the .htaccess -->
                                         }else
                                         {
                                             //allarray.splice(-1,1);
-
                                             callarray.splice(callarray.indexOf("<endmultiarg>"));
                                             // Lets also remove it from "newcode"
                                             code.splice(callarray.length+index-1,1);
                                            
                                         }
                                     }
-                                    //console.log("Going to call "+callarray);
+                                    console.log("Going to call "+callarray);
                                     var result = this.exec(callarray,scope); // Executed code stored in array
                                     //console.log("The result was: "+result );
                                     // Change
@@ -304,8 +344,13 @@ Remove this if you use the .htaccess -->
                             {
                                 
                                 procedure = this.getprocedure(call[0]);
-                                console.log("CALLING "+procedure);
-                                return; // Add procedures return value
+                                //console.log("CALLING "+procedure);
+                                this.globalscope.newlocal();
+                                var res =  this.run(procedure[2].slice())[0]; // Add procedures return value
+                                this.globalscope.leavelocal();
+                                return res;
+                            }else{
+                            
                             }
                             
                             
@@ -859,7 +904,8 @@ Remove this if you use the .htaccess -->
                                         return true;	
                                     }	
                                 }	
-                            }	
+                            }
+                            
                             for(var index = 0;index<this.procedures.length;index++)
                             {
                                 if(this.procedures[index][0] == fname)
@@ -899,7 +945,7 @@ Remove this if you use the .htaccess -->
                             // Check if it is a procedure
                             for(var index = 0;index<this.procedures.length;index++)
                             {
-                                if(this.procedures[index][0] == fname)
+                                if(this.procedures[index][0] == prname)
                                 {
                                     return true;	
                                 }	
@@ -912,7 +958,7 @@ Remove this if you use the .htaccess -->
                             // Return the procedures code
                             for(var index = 0;index<this.procedures.length;index++)
                             {
-                                if(this.procedures[index][0] == fname)
+                                if(this.procedures[index][0] == prname)
                                 {
                                     return this.procedures[index];	
                                 }	
@@ -1859,10 +1905,13 @@ Remove this if you use the .htaccess -->
                     
                     globaltable.define(["make"],function(varname,expr,scope){
                         alert(varname +"=>"+ expr);
-                        if(scope.setglobal(varname,expr) != "succ")
+                        if(scope.setvar(varname,expr) != "succ")
                             alert("ERROR WHILE SETTING VARIABLE");
                     },2,true,false);
                     
+                    globaltable.define(["local"],function(varname,scope){
+                        scope.addlocal(varname);
+                    },1,true,false);
                     
                     globaltable.define(["thing"],function(varname,scope){
                         return scope.getval(varname);
@@ -1895,6 +1944,10 @@ Remove this if you use the .htaccess -->
                               
                         }
                     },2,false,true);
+                              
+                    globaltable.define(["output","op"],function(rval){
+                        return rval;          
+                    });
                     // FOR LOOP
                     
                         // *NEW FOR LOOP*
