@@ -64,9 +64,9 @@ Remove this if you use the .htaccess -->
                                 {
                                     if(this.locals[index][i][0] == varname)
                                     {
-                                        console.log(this.locals);
+                                        //console.log(this.locals);
                                         this.locals[index][i][1] = val;
-                                        console.log(this.locals);
+                                        //console.log(this.locals);
                                     }
                                     return "succ";
                                 }
@@ -134,15 +134,15 @@ Remove this if you use the .htaccess -->
                         }
                         this.leavelocal = function()
                         {
-                            console.log(this.locals);
+                            //console.log(this.locals);
                             this.locals.pop();
-                            console.log(this.locals);
+                            //console.log(this.locals);
                         }
                         
                         this.addlocal = function(varname)
                         {
                             this.locals[this.locals.length-1][this.locals[this.locals.length - 1].length] = [varname,undefined];
-                            console.log(this.locals);
+                            //console.log(this.locals);
                             
                         }
                     }
@@ -238,7 +238,7 @@ Remove this if you use the .htaccess -->
                             var callarray = []; 
                             for(var index = code.length-1;index >= 0;index --)
                             {
-                                console.log(code[index]);
+                                //console.log(code[index]);
                                 if(!this.isproc_orfunc(code[index]))
                                 {
                                     callarray.unshift(code[index]);	
@@ -276,7 +276,7 @@ Remove this if you use the .htaccess -->
                                            
                                         }
                                     }
-                                    console.log("Going to call "+callarray);
+                                    //console.log("Going to call "+callarray);
                                     var result = this.exec(callarray,scope); // Executed code stored in array
                                     //console.log("The result was: "+result );
                                     // Change
@@ -346,6 +346,15 @@ Remove this if you use the .htaccess -->
                                 procedure = this.getprocedure(call[0]);
                                 //console.log("CALLING "+procedure);
                                 this.globalscope.newlocal();
+                                for(var index = 0;index<procedure[1].length;index++)
+                                {
+                                    // DO IT
+                                    //console.log(procedure[1][index].substr(1) + " " + call[index+1])
+                                    this.globalscope.addlocal(procedure[1][index].substr(1));
+                                    this.globalscope.setvar(procedure[1][index].substr(1),call[index+1]);
+                                    //this.globalscope.addlocal();
+                                }
+                                //console.log("CALLING"+procedure);
                                 var res =  this.run(procedure[2].slice())[0]; // Add procedures return value
                                 this.globalscope.leavelocal();
                                 return res;
@@ -383,6 +392,13 @@ Remove this if you use the .htaccess -->
                         this.get_next_eval = function(code)
                         {
                             //alert(code);
+                            if(code.length == 1)
+                            {
+                                if(this.isproc_orfunc(code[0]))
+                                {
+                                    return [1,[code[0]]];
+                                }
+                            }
                             for(var index = 0;index<code.length;index++)
                             {
                                 // Check for procedure definition
@@ -586,13 +602,14 @@ Remove this if you use the .htaccess -->
                                 }
                                 if(this.isspecialtoken(code[index],"end"))
                                 {
-                                    console.log(procdef);
                                     // TODO Define the procedure
+                                    console.log(procdef);
                                     this.define_procedure(procdef[0],procdef[1],procdef[2])
                                     code = code.splice(index+1,code.length);
-                                    index = 0;
+                                    index = -1;
                                     procdef = [[],[],[]];
                                     inproc = false;	
+                                    vararg = true;
                                 }
                                 if(inproc == true && vararg == false)
                                 {
