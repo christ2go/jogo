@@ -54,7 +54,14 @@ Remove this if you use the .htaccess -->
                             
                             this.vars[this.vars.length] = [varname,[]];
                         };
-                        
+                        this.setop = function(expr)
+                        {
+                            if(this.returned == false)
+                            {
+                                this.returned = true;
+                                this.op = expr;
+                            }
+                        }
                         this.setvar = function(varname,val)
                         {
                             // Check if variable is local
