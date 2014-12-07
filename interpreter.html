@@ -35,6 +35,17 @@ Remove this if you use the .htaccess -->
                 <button type="submit" id="codesubmit">Absenden</button>
                 <!-- INTERPRETER GOES HERE -->
                 <script>
+                    // PROBLEM: CODE IS GETTING REMOVED SOMEWHERE
+                    
+                    /*
+                    
+                        LOGOJS V 0.0.1
+                        A LOGO INTERPRETER WRITTEN IN JAVASCRIPT
+                        (c) Christian Albert Hagemeier 2014
+                        
+                        Sunday, 7th December 2014 
+                        20:26:56
+                    */
                     // Scoping model
                     //window.alert = function() {};
                     function scopeobj()
@@ -42,6 +53,8 @@ Remove this if you use the .htaccess -->
                         // Aufbau: [name,[wert1,wer2,...]]
                         this.vars = [];
                         this.locals = [[]];
+                        this.returned = false;
+                        this.op = undefined;
                         this.createvar = function()
                         {
                             for(var index=0;index<this.vars.length;index++)
@@ -65,17 +78,16 @@ Remove this if you use the .htaccess -->
                         this.setvar = function(varname,val)
                         {
                             // Check if variable is local
-                            for(var index = this.locals.length-1;index > 0;index--)
+                            for(var index = 0;index<this.locals.length;index++)
                             {
                                 for(var i = 0;i<this.locals[index].length;i++)
                                 {
-                                    if(this.locals[index][i][0] == varname)
-                                    {
-                                        //console.log(this.locals);
-                                        this.locals[index][i][1] = val;
-                                        //console.log(this.locals);
-                                    }
+                                  if(this.locals[index][i][0] == varname)
+                                  {
+                                    // Variable already exists
+                                    this.locals[index][i][1] = val;
                                     return "succ";
+                                  }
                                 }
                             }
                             // Check if variable exists
@@ -91,6 +103,7 @@ Remove this if you use the .htaccess -->
                             
                             // Variable hasn't been found
                             this.vars[this.vars.length] = [varname,[val]];
+                            
                         };
                         
                         this.setglobal = function(varname,val)
@@ -116,8 +129,11 @@ Remove this if you use the .htaccess -->
                             {
                                 for(var i = 0;i<this.locals[index].length;i++)
                                 {
-                                    if(this.locals[index][i][0] == varname)
-                                       return this.locals[index][i][1];
+                                  if(this.locals[index][i][0] == varname)
+                                  {
+                                    // Variable already exists
+                                    return this.locals[index][i][1];
+                                  }
                                 }
                             }
                             for(var index=0;index<this.vars.length;index++)
@@ -138,16 +154,31 @@ Remove this if you use the .htaccess -->
                         this.newlocal = function()
                         {
                             this.locals[this.locals.length] = [];
+                            this.returned = false;
+                            this.op = undefined;
                         }
                         this.leavelocal = function()
                         {
                             //console.log(this.locals);
-                            this.locals.pop();
+                            this.locals.splice(-1,1);
+                            this.returned = false;
+                            this.op = undefined;
                             //console.log(this.locals);
                         }
                         
                         this.addlocal = function(varname)
                         {
+                            for(var index = 0;index<this.locals.length;index++)
+                            {
+                                for(var i = 0;i<this.locals[index].length;i++)
+                                {
+                                  if(this.locals[index][i][0] == varname)
+                                  {
+                                    // Variable already exists
+                                    return;
+                                  }
+                                }
+                            }
                             this.locals[this.locals.length-1][this.locals[this.locals.length - 1].length] = [varname,undefined];
                             //console.log(this.locals);
                             
@@ -214,6 +245,13 @@ Remove this if you use the .htaccess -->
                             // Get next func call
                             var i = 0;
                             var run = this.get_next_eval(code);
+                            
+                            console.log(run);
+                            if(run == undefined || run == [] || run == "")
+                                {
+                                    return  [""];
+                                    
+                                }
                             while(run[1] != [])
                             {
                                 var result = this.runit(run[1],scope);
@@ -222,9 +260,10 @@ Remove this if you use the .htaccess -->
                                     code.shift();
                                 i ++;
                                 run = this.get_next_eval(code);
-                                if(run == undefined)
+                                
+                                if(run == undefined || run == [])
                                 {
-                                    return result;
+                                    return  [""];
                                     
                                 }
                             }
@@ -245,6 +284,10 @@ Remove this if you use the .htaccess -->
                             var callarray = []; 
                             for(var index = code.length-1;index >= 0;index --)
                             {
+                                if(this.globalscope.op !== undefined)
+                                {
+                                    return [];
+                                }
                                 //console.log(code[index]);
                                 if(!this.isproc_orfunc(code[index]))
                                 {
@@ -274,7 +317,8 @@ Remove this if you use the .htaccess -->
                                         {	
                                             callarray.pop();
 
-                                        }else
+                                        }
+                                        else
                                         {
                                             //allarray.splice(-1,1);
                                             callarray.splice(callarray.indexOf("<endmultiarg>"));
@@ -283,7 +327,8 @@ Remove this if you use the .htaccess -->
                                            
                                         }
                                     }
-                                    //console.log("Going to call "+callarray);
+                                    
+                                    console.log("Going to call "+callarray);
                                     var result = this.exec(callarray,scope); // Executed code stored in array
                                     //console.log("The result was: "+result );
                                     // Change
@@ -337,11 +382,10 @@ Remove this if you use the .htaccess -->
                                 if(call[index][0] == ":")
                                 {
                                     var name = element.substr(1);
-                                    alert("VARAIABLE "+name);
                                     call[index] = this.globalscope.getval(element.substr(1));
-
                                     
                                 }
+                                
                             }
                             
                             
@@ -350,8 +394,10 @@ Remove this if you use the .htaccess -->
                             if(this.isprocedure(call[0]))
                             {
                                 
-                                procedure = this.getprocedure(call[0]);
-                                //console.log("CALLING "+procedure);
+                                procedure = copy(this.getprocedure(call[0]));
+                                
+                                console.log("CALLING");
+                                console.log(procedure);
                                 this.globalscope.newlocal();
                                 for(var index = 0;index<procedure[1].length;index++)
                                 {
@@ -359,10 +405,17 @@ Remove this if you use the .htaccess -->
                                     //console.log(procedure[1][index].substr(1) + " " + call[index+1])
                                     this.globalscope.addlocal(procedure[1][index].substr(1));
                                     this.globalscope.setvar(procedure[1][index].substr(1),call[index+1]);
-                                    //this.globalscope.addlocal();
                                 }
+                                
                                 //console.log("CALLING"+procedure);
-                                var res =  this.run(procedure[2].slice())[0]; // Add procedures return value
+                                var res =  this.run((procedure.slice()[2]))[0]; // Add procedures return value
+                                // Check output stack
+                                console.log("==>");
+                                console.log(this.globalscope.op);
+                                
+                                
+                                var res = this.globalscope.op;
+                                
                                 this.globalscope.leavelocal();
                                 return res;
                             }else{
@@ -396,6 +449,8 @@ Remove this if you use the .htaccess -->
                             }
                         }
                         }
+                        
+                        
                         this.get_next_eval = function(code)
                         {
                             //alert(code);
@@ -1928,7 +1983,7 @@ Remove this if you use the .htaccess -->
 					 */
                     
                     globaltable.define(["make"],function(varname,expr,scope){
-                        alert(varname +"=>"+ expr);
+                        
                         if(scope.setvar(varname,expr) != "succ")
                             alert("ERROR WHILE SETTING VARIABLE");
                     },2,true,false);
@@ -1941,6 +1996,11 @@ Remove this if you use the .htaccess -->
                         return scope.getval(varname);
                     },1,true,false);
                     
+                    globaltable.define(["output","op"],function(expr,scope){
+                        // Check if output exists
+                        //alert("OP: "+expr);
+                        scope.setop(expr);
+                    },1,true,false);
                     
                     /*
                      *  CONTROL STRUCTURE FUNCTIONS
@@ -1969,8 +2029,11 @@ Remove this if you use the .htaccess -->
                         }
                     },2,false,true);
                               
-                    globaltable.define(["output","op"],function(rval){
-                        return rval;          
+                    globaltable.define(["EXIT"],function()
+                    {
+                        /* ABORT IS AN EXTENSION TO THE LOGO LANGUAGE STANDARD */
+                        /* IT EXISTS THE CURRENT PROGRAM */
+                        throw new Error("LOGO EXIT!"); 
                     });
                     // FOR LOOP
                     
@@ -2030,6 +2093,21 @@ Remove this if you use the .htaccess -->
                         }
                         return joined;
                     }
+                    // Taken from http://www.xenoveritas.org/blog/xeno/the-correct-way-to-clone-javascript-arrays       
+                    function copy(array)
+                        {
+                            var cpy = [];
+                            for(var index = 0;index<array.length;index++)
+                            {
+                                if(Object.prototype.toString.call( array[index] ) === '[object Array]')
+                                {
+                                    cpy[cpy.length] = copy(array[index]);
+                                }else{
+                                    cpy[cpy.length] = array[index];
+                                }
+                            }
+                            return cpy;
+                        }
                 </script>
 
             </div>
