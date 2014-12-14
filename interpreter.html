@@ -34,20 +34,15 @@ Remove this if you use the .htaccess -->
                 <textarea id="mycode" width="750" height="200"></textarea><br />
                 <button type="submit" id="codesubmit">Absenden</button>
                 <!-- INTERPRETER GOES HERE -->
-                <script>
-                    // PROBLEM: CODE IS GETTING REMOVED SOMEWHERE
-                    
+                <script>                    
                     /*
                     
-                        LOGOJS V 0.0.1
+                        LOGOJS V 0.0.0.1
                         A LOGO INTERPRETER WRITTEN IN JAVASCRIPT
-                        (c) Christian Albert Hagemeier 2014
                         
-                        Sunday, 7th December 2014 
-                        20:26:56
+                        (c) Christian Albert Hagemeier, 2014
+                        13.Dezember 2014
                     */
-                    // Scoping model
-                    //window.alert = function() {};
                     function scopeobj()
                     {
                         // Aufbau: [name,[wert1,wer2,...]]
@@ -78,7 +73,7 @@ Remove this if you use the .htaccess -->
                         this.setvar = function(varname,val)
                         {
                             // Check if variable is local
-                            for(var index = 0;index<this.locals.length;index++)
+                            for(var index = this.locals.length-1;index>=0;index--)
                             {
                                 for(var i = 0;i<this.locals[index].length;i++)
                                 {
@@ -125,7 +120,7 @@ Remove this if you use the .htaccess -->
                         this.getval = function(varname)
                         {
                             varname = varname.toLowerCase();
-                            for(var index = 0;index<this.locals.length;index++)
+                            for(var index = this.locals.length-1;index>=0;index--)
                             {
                                 for(var i = 0;i<this.locals[index].length;i++)
                                 {
@@ -160,7 +155,10 @@ Remove this if you use the .htaccess -->
                         this.leavelocal = function()
                         {
                             //console.log(this.locals);
-                            this.locals.splice(-1,1);
+                            alert("LEAVING SCOPE");
+                            console.log(this.locals);
+                            this.locals.pop();
+                            console.log(this.locals);
                             this.returned = false;
                             this.op = undefined;
                             //console.log(this.locals);
@@ -168,22 +166,20 @@ Remove this if you use the .htaccess -->
                         
                         this.addlocal = function(varname)
                         {
-                            for(var index = 0;index<this.locals.length;index++)
-                            {
-                                for(var i = 0;i<this.locals[index].length;i++)
+                                for(var i = 0;i<this.locals[this.locals.length-1].length;i++)
                                 {
-                                  if(this.locals[index][i][0] == varname)
+                                  if(this.locals[this.locals.length-1][i][0] == varname)
                                   {
                                     // Variable already exists
                                     return;
                                   }
                                 }
-                            }
                             this.locals[this.locals.length-1][this.locals[this.locals.length - 1].length] = [varname,undefined];
                             //console.log(this.locals);
                             
                         }
                     }
+                    
                     // Handling for tab in textarea
                     $("textarea").keydown(function(e) {
                         if(e.keyCode === 9) { // tab was pressed
@@ -329,8 +325,9 @@ Remove this if you use the .htaccess -->
                                     }
                                     
                                     console.log("Going to call "+callarray);
+                                    console.log(code);
                                     var result = this.exec(callarray,scope); // Executed code stored in array
-                                    //console.log("The result was: "+result );
+                                    console.log("The result was: "+result );
                                     // Change
                                     //console.log(code);
                                     var newcode = [];
@@ -356,7 +353,7 @@ Remove this if you use the .htaccess -->
                                     {
                                         newcode.pop();
                                     }
-                                    //console.log(newcode);
+                                    console.log(newcode);
                                     // Generated call array correctly
                                     // Don't do more :-)
                                     return this.runit(newcode);
@@ -411,11 +408,11 @@ Remove this if you use the .htaccess -->
                                 var res =  this.run((procedure.slice()[2]))[0]; // Add procedures return value
                                 // Check output stack
                                 console.log("==>");
-                                console.log(this.globalscope.op);
+                                
                                 
                                 
                                 var res = this.globalscope.op;
-                                
+                                console.log(res,this.globalscope.locals.length);
                                 this.globalscope.leavelocal();
                                 return res;
                             }else{
@@ -445,9 +442,9 @@ Remove this if you use the .htaccess -->
                                         }
                                         //console.log("Calling "+prname+" "+call);
                                         return(this.primitives[index][1].apply(null,call));
-                                }	
+                                    }	
+                                }
                             }
-                        }
                         }
                         
                         
@@ -1114,7 +1111,7 @@ Remove this if you use the .htaccess -->
                             return prefixlist;
 
                         };
-                        // Helepers for Infix
+                        // Helpers for Infix
                         function is_operand(opr)
                         {
                             return !is_operator(opr) && (opr != "(" && opr != ")") ? 1:0	
@@ -1260,6 +1257,7 @@ Remove this if you use the .htaccess -->
                             if(ltype(arguments[argc]) == "list")
                             {
                                 // TODO Throw an error => list can't be sentenced
+                                
 
                             }
                             wort = wort + arguments[argc];
@@ -1283,7 +1281,9 @@ Remove this if you use the .htaccess -->
                             if(ltype(arguments[argc]) == "list")
                             {
                                 // TODO Sentence the list
-
+                                for(var index = 0;index<arguments[argc].length;index++)
+                                    sentence = sentence + arguments[argc][index] + " ";
+                                continue;
                             }
                             sentence = sentence + arguments[argc] + " ";
                         }
@@ -1896,7 +1896,9 @@ Remove this if you use the .htaccess -->
                     // PREDICATES
                     globaltable.define(["lessp","less?"],function(a,b){
                         if(!a || !b)
-                        { /* error */ }
+                        {
+                            /* error */ 
+                        }
                         if(a<b)
                         {
                             return true;
@@ -2035,9 +2037,27 @@ Remove this if you use the .htaccess -->
                         /* IT EXISTS THE CURRENT PROGRAM */
                         throw new Error("LOGO EXIT!"); 
                     });
-                    // FOR LOOP
-                    
-                        // *NEW FOR LOOP*
+                    // REPEAT
+                    globaltable.define(["repeat"],function(nmbr,code,scope,interp){
+                        if(!isNormalInteger(nmbr))
+                        {
+                            // Throw a Logo Error
+                            console.log("REPEAT EXSPECTS ARGUMENT 1 TO BE A POSITIVE INTEGER");
+                            return;
+                        }
+                        
+                        // It's an integer
+                        scope.addlocal("repcount");
+                        for(var index = 1; index != nmbr;index++)
+                        {
+                            scope.setvar("repcount",index);
+                            interp.evaluate(betterjoin(code));
+                        }
+                    },2,true,true);
+                    function isNormalInteger(str) {
+                        var n = ~~Number(str);
+                        return String(n) === str && n >= 0;
+                    }
                     
                     function is_poperand(token)
                     {
@@ -2095,7 +2115,7 @@ Remove this if you use the .htaccess -->
                     }
                     // Taken from http://www.xenoveritas.org/blog/xeno/the-correct-way-to-clone-javascript-arrays       
                     function copy(array)
-                        {
+                    {
                             var cpy = [];
                             for(var index = 0;index<array.length;index++)
                             {
@@ -2107,7 +2127,7 @@ Remove this if you use the .htaccess -->
                                 }
                             }
                             return cpy;
-                        }
+                    }
                 </script>
 
             </div>
