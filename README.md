@@ -8,9 +8,16 @@ JOGO is a logo interpreter written in JavaScript. It currently is still under de
 *   Nearly all built-in Logo procedures
 *   Ability to define your own procedures
 
+Many things already work.
+It is still under development, so Infixparsing and recursion don't really work at the moment, but these should be fixed within the next weeks.
+** Current Version: 0.0.0.1 **
+(Yeah, a lot of zeros)
+
 ##  TODO 
 
-<li>Saving your procedures for later </li>
-</ul>
+*   Arrays (not supposed to be implemented)
+*   Saving your procedures for later
 
 Released unter GPL.
+
+(c) Christian Hagemeier, 2014
