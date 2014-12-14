@@ -10,7 +10,8 @@ JOGO is a logo interpreter written in JavaScript. It currently is still under de
 
 Many things already work.
 It is still under development, so Infixparsing and recursion don't really work at the moment, but these should be fixed within the next weeks.
-** Current Version: 0.0.0.1 **
+
+**Current Version: 0.0.0.1**
 (Yeah, a lot of zeros)
 
 ##  TODO 
