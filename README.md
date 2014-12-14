@@ -1,5 +1,16 @@
-JSLOGO
-=====
+###  JOGO 
 
-**A Logointerpreter written in JavaScript**
-This is a Logo Interpreter completely written in JavaScript. It's currently still under develpment, so it doesn't really work. In the future it should implement the whole Ucblogo functionality.
+JOGO is a logo interpreter written in JavaScript. It currently is still under development.
+
+## Features
+
+*   Variables
+*   Nearly all built-in Logo procedures
+*   Ability to define your own procedures
+
+##  TODO 
+
+<li>Saving your procedures for later </li>
+</ul>
+
+Released unter GPL.
