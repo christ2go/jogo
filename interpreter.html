@@ -37,11 +37,26 @@ Remove this if you use the .htaccess -->
                 <script>                    
                     /*
                     
-                        LOGOJS V 0.0.0.1
+                        LOGOJS V 0.0.1
                         A LOGO INTERPRETER WRITTEN IN JAVASCRIPT
                         
+                         *    .######...####....####....####..
+                         *    .....##..##..##..##......##..##.
+                         *    .....##..##..##..##.###..##..##.
+                         *    .##..##..##..##..##..##..##..##.
+                         *    ..####....####....####....####..
+                         *    ................................
+                         
                         (c) Christian Albert Hagemeier, 2014
                         13.Dezember 2014
+                        Released on 15th December 2014
+                        Files
+                        * prng.js
+                    */
+                    
+                    /* ERROR: print sentence reverse "a "chr
+                    (a user-defined 1 arg)
+                    doesn't work
                     */
                     function scopeobj()
                     {
@@ -127,6 +142,9 @@ Remove this if you use the .htaccess -->
                                   if(this.locals[index][i][0] == varname)
                                   {
                                     // Variable already exists
+                                    
+                                    if(ltype(this.locals[index][i][1]) == "list")
+                                        return this.locals[index][i][1].slice(0);
                                     return this.locals[index][i][1];
                                   }
                                 }
@@ -266,6 +284,7 @@ Remove this if you use the .htaccess -->
                         };
                         this.runit = function(code,scope)
                         {
+                            var code = code.splice(0);
                             //alert(">>",code);
                             if(code.length == 1 && !this.isproc_orfunc(code[0]))
                             {
@@ -319,44 +338,25 @@ Remove this if you use the .htaccess -->
                                             //allarray.splice(-1,1);
                                             callarray.splice(callarray.indexOf("<endmultiarg>"));
                                             // Lets also remove it from "newcode"
-                                            code.splice(callarray.length+index-1,1);
+                                            code.splice(callarray.length+index-1);
                                            
                                         }
                                     }
-                                    
-                                    console.log("Going to call "+callarray);
                                     console.log(code);
-                                    var result = this.exec(callarray,scope); // Executed code stored in array
+                                    var result = this.exec(callarray.slice(),scope); // Executed code stored in array                     
                                     console.log("The result was: "+result );
                                     // Change
                                     //console.log(code);
-                                    var newcode = [];
-                                    for(var i = 0;i < code.length;i ++)
+                                    //var newcode = [];
+                                    code.splice(index,callarray.length,result);
+                                    if(code[code.length-1] == "<endmultiarg>" && code.length == 2)
                                     {
-                                        if(i>index && i<=index+callarray.length)
-                                        {
-                                        } 
-                                        else if(multiarg && i == index-1 || multiarg && i+1 == index )
-                                        {
-                                            
-                                        }
-                                        else if(i == index){
-                                            newcode[newcode.length] = result;	
-                                        }
-                                        else
-                                        {
-                                            newcode[newcode.length] = code[i];	
-                                        }
+                                        code.pop();
                                     }
-
-                                    if(newcode[newcode.length-1] == "<endmultiarg>" && newcode.length == 2)
-                                    {
-                                        newcode.pop();
-                                    }
-                                    console.log(newcode);
+                                    console.log(code);
                                     // Generated call array correctly
                                     // Don't do more :-)
-                                    return this.runit(newcode);
+                                    return this.runit(code);
                                 }
                             }
                         };
@@ -1275,22 +1275,25 @@ Remove this if you use the .htaccess -->
                             // TODO Throw an error
 
                         }
-                        var sentence = "\"";
-                        for(var argc = 0;argc<arguments.length;argc++)
-                        {
-                            if(ltype(arguments[argc]) == "list")
-                            {
-                                // TODO Sentence the list
-                                for(var index = 0;index<arguments[argc].length;index++)
-                                    sentence = sentence + arguments[argc][index] + " ";
-                                continue;
-                            }
-                            sentence = sentence + arguments[argc] + " ";
+                                newlist = [];
+                                for(var index = 0;index<arguments.length;index++)
+                                {
+                                    // if it is a list extract element
+                                    var element = arguments[index];
+                                    if(ltype(element) == "list")
+                                    {
+                                        for(var
+                                            i = 0;i<arguments[index].length;i++)
+                                            newlist[newlist.length] = arguments[index][i];
+                                    }else{
+                                            newlist[newlist.length] = arguments[index];
+                                    }
+                                }
+                                return newlist;
                         }
 
-                        return sentence;
 
-                    },-1);
+                    ,-1);
 
                     globaltable.define(["fput"],function(a,b){
                         // n elements but at least 
@@ -1398,14 +1401,17 @@ Remove this if you use the .htaccess -->
                     });
 
                     globaltable.define(["butfirst","bf"],function(wordorlist){
-                        if(false) // TODO Type-checking wordorlist
-                        {
-                            // TODO Throw an error
-                        }
-                        if(!wordorlist.length >= 1)
+                        
+                        if(wordorlist.length == 0)
                         {
                             // TODO error	
+                            return "";
                         }
+                        if(wordorlist.length == 1)
+                        {
+                            return wordorlist;
+                        }
+                        
                         return wordorlist.slice(1);
 
                     });
@@ -1534,7 +1540,7 @@ Remove this if you use the .htaccess -->
                     // Queries
                     globaltable.define(["count"],function(wordorlist){
                         // TODO Type Checking (wordorlist)
-                        return wordorlist.length;
+                        return (wordorlist.length);
                     });
                     globaltable.define(["ascii"],function(char){
                         if(ltype(char) != "word")
