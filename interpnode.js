@@ -1,73 +1,13 @@
-<!DOCTYPE html>
-
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-
-        <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
-Remove this if you use the .htaccess -->
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
-        <title>Logo in your browser</title> 
-        <meta name="description" content="">
-        <meta name="author" content="">
-
-        <meta name="viewport" content="width=device-width; initial-scale=1.0">
-        <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.1.min.js"></script>
-        <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
-        <link rel="shortcut icon" href="/favicon.ico">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-        
-        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
-    </head>
-
-    <body>
-        <div>
-            <header>
-                <h1>Logo Interpreter</h1>
-            </header>
-            <nav></nav>
-
-            <div>
-                <textarea id="mycode" width="750" height="200"></textarea><br />
-                <button type="submit" id="codesubmit">Absenden</button>
-                <!-- INTERPRETER GOES HERE -->
-                <script>                    
-                    /*
-                    
-                        LOGOJS V 0.0.1
-                        A LOGO INTERPRETER WRITTEN IN JAVASCRIPT
+test = new logointerpreter();
+// Read argc files
+function plist()
+{
+    this.plist = {};
                         
-                         *    .######...####....####....####..
-                         *    .....##..##..##..##......##..##.
-                         *    .....##..##..##..##.###..##..##.
-                         *    .##..##..##..##..##..##..##..##.
-                         *    ..####....####....####....####..
-                         *    ................................
-                         
-                        (c) Christian Albert Hagemeier, 2014
-                        13.Dezember 2014
-                        Released on 15th December 2014
-                        Files
-                        * prng.js
-                    */
-                    
-                    /* ERROR: print sentence reverse "a "chr
-                    (a user-defined 1 arg)
-                    doesn't work
-                    */
-                    
-                    // Class for handling a property list
-                    function plist()
-                    {
-                        this.plist = {};
-                        
-                        this.pprop = function(varname,value)
-                        {
-                            this.plist[varname] = value;
-                        }
+    this.pprop = function(varname,value)
+    {
+            this.plist[varname] = value;
+    }
                         
                         this.gprop = function(varname)
                         {
@@ -96,7 +36,7 @@ Remove this if you use the .htaccess -->
                         
                     }
                     
-                    function scopeobj()
+                                        function scopeobj()
                     {
                         // Aufbau: [name,[wert1,wer2,...]]
                         this.vars = {};
@@ -183,37 +123,11 @@ Remove this if you use the .htaccess -->
                             this.locals[this.locals.length-1][varname] = undefined;
                         };
                     }
+
                     
                     // Handling for tab in textarea
-                    $("textarea").keydown(function(e) {
-                        if(e.keyCode === 9) { // tab was pressed
-                            // get caret position/selection
-                            var start = this.selectionStart;
-                            var end = this.selectionEnd;
 
-                            var $this = $(this);
-                            var value = $this.val();
 
-                            // set textarea value to: text before caret + tab + text after caret
-                            $this.val(value.substring(0, start)
-                                      + "\t"
-                                      + value.substring(end));
-
-                            // put caret at right position again (add one for the tab)
-                            this.selectionStart = this.selectionEnd = start + 1;
-
-                            // prevent the focus lose
-                            e.preventDefault();
-                        }
-                    });
-
-                    test = new logointerpreter();
-
-                    $("#codesubmit").click(function(){
-                        var code = $("#mycode").val().replace(/(\r\n|\n|\r)/gm," ").replace("\t"," ");
-                        console.log(test.evaluate(code));
-                        //console.log((test.parseinfix(me)));
-                    });
                     function logointerpreter() {
                         var self = this;
                         // 1st Parse the String
@@ -227,7 +141,6 @@ Remove this if you use the .htaccess -->
                         {
                             // Main Interpreter function, used for evaluating the code
                             var code = this.parse_code(code);
-                            alert(">>>"+code);
                              return this.run(code)[0];
                             /*
 							var teste;
@@ -250,7 +163,6 @@ Remove this if you use the .htaccess -->
                             var i = 0;
                             var run = this.get_next_eval(code);
                             
-                            console.log(run);
                             if(run == undefined || run == [] || run == "")
                                 {
                                     return  [""];
@@ -274,6 +186,10 @@ Remove this if you use the .htaccess -->
                         };
                         this.runit = function(code,scope)
                         {
+                            if(this.globalscope.op == true)
+                            {
+                                return;
+                            }
                             var code = code.splice(0);
                             //alert(">>",code);
                             if(code.length == 1 && !this.isproc_orfunc(code[0]))
@@ -317,7 +233,6 @@ Remove this if you use the .htaccess -->
                                     }
                                     else
                                     {
-                                        alert(callarray);
                                         if(callarray.indexOf("<endmultiarg>") == callarray.length-1)
                                         {	
                                             callarray.pop();
@@ -332,9 +247,7 @@ Remove this if you use the .htaccess -->
                                            
                                         }
                                     }
-                                    console.log(code);
                                     var result = this.exec(callarray.slice(),scope); // Executed code stored in array                     
-                                    console.log("The result was: "+result );
                                     // Change
                                     //console.log(code);
                                     //var newcode = [];
@@ -343,7 +256,6 @@ Remove this if you use the .htaccess -->
                                     else
                                         code.splice(index-1,callarray.length+2,result);
                                     
-                                    console.log(code);
                                     // Generated call array correctly
                                     // Don't do more :-)
                                     return this.runit(code);
@@ -383,8 +295,6 @@ Remove this if you use the .htaccess -->
                                 
                                 procedure = copy(this.getprocedure(call[0]));
                                 
-                                console.log("CALLING");
-                                console.log(procedure);
                                 this.globalscope.newlocal();
                                 for(var index = 0;index<procedure[1].length;index++)
                                 {
@@ -397,12 +307,10 @@ Remove this if you use the .htaccess -->
                                 //console.log("CALLING"+procedure);
                                 var res =  this.run((procedure.slice()[2]))[0]; // Add procedures return value
                                 // Check output stack
-                                console.log("==>");
                                 
                                 
                                 
                                 var res = this.globalscope.op;
-                                console.log(res,this.globalscope.locals.length);
                                 this.globalscope.leavelocal();
                                 return res;
                             }else{
@@ -547,14 +455,11 @@ Remove this if you use the .htaccess -->
 
                             if(klammern != 0)
                             {
-                                alert("Klammer Fehler");
                                 return;	
                             }
-                            alert(code);
 
                             // Booleans CAN ONLY be parsed correctly at execution time
                             code = this.multiargparans(code);
-                            alert("marg"+code);
                             
                             for(var index = 0; index<code.length;index++)
                             {
@@ -616,7 +521,6 @@ Remove this if you use the .htaccess -->
                                     // Check answap
                                     if(code[index-1] == "<endmultiarg>")
                                     {
-                                        alert(code[index]);
                                         var margs = 1;
                                         for(var i = index-1;i>0;i--)
                                         {
@@ -628,7 +532,6 @@ Remove this if you use the .htaccess -->
                                                 if(margs == 0)
                                                 {
                                                     //code[index] == ""
-                                                    alert("marg:"+code[index]);
                                                 }
                                             }
                                             if(token == "<endmultiarg>")
@@ -661,7 +564,6 @@ Remove this if you use the .htaccess -->
                                 if(this.isspecialtoken(code[index],"end"))
                                 {
                                     // TODO Define the procedure
-                                    console.log(procdef);
                                     this.define_procedure(procdef[0],procdef[1],procdef[2])
                                     code = code.splice(index+1,code.length);
                                     index = -1;
@@ -675,7 +577,6 @@ Remove this if you use the .htaccess -->
                                 }	
 
                             }
-                            alert("!!parsed: "+code);
 
                             return code; // Parsing complete 
                         }
@@ -743,7 +644,6 @@ Remove this if you use the .htaccess -->
 
                                 // Append parsed
                             }
-                            console.log(tokens);
                             return tokens;
                         };
 
@@ -956,7 +856,6 @@ Remove this if you use the .htaccess -->
                             // TODO Check if funcname is already used
 
                             this.primitives[this.primitives.length] = [funcnames,fn,fnarity,scope,interpobj]; 
-                            console.log(this.primitives[this.primitives.length-1]);
                         };
                         this.langalt = function(funcname,name,lang)
                         {
@@ -1302,11 +1201,13 @@ Remove this if you use the .htaccess -->
                             // TODO Throw an error
 
                         }
-                        console.log(b);
-                        var list = b;
+
+                        var list = b.slice(0);;
+                        if(ltype(b) == "word")
+                            console.log(b);
                         var extra = a;
                         //console.log(a,b);
-                        list.push(extra);
+                        list.unshift(extra);
                         return list;
 
                     },2);
@@ -1324,7 +1225,6 @@ Remove this if you use the .htaccess -->
                         if(list == extra){
                             // TODO Zirkuläre Liste
                         }
-                        console.log(a,b);
                         list.push(extra);
                         return list;
 
@@ -1982,7 +1882,7 @@ Remove this if you use the .htaccess -->
                             return;
                         }
                         val +="";
-                        console.log("LOGO WRITES:"+val);
+                        console.log(val);
                     });
                     
                     /* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
@@ -1991,8 +1891,7 @@ Remove this if you use the .htaccess -->
                     
                     globaltable.define(["make"],function(varname,expr,scope){
                         
-                        if(scope.setvar(varname,expr) != "succ")
-                            alert("ERROR WHILE SETTING VARIABLE");
+                        scope.setvar(varname,expr);
                     },2,true,false);
                     
                     globaltable.define(["local"],function(varname,scope){
@@ -2028,7 +1927,6 @@ Remove this if you use the .htaccess -->
                     // WHILE LOOP
                               
                     globaltable.define(["while"],function(tflist,runlist,interp){
-                        console.log(tflist,runlist);
                         while(interp.evaluate(betterjoin(tflist)))
                         {
                               interp.evaluate(betterjoin(runlist));
@@ -2133,12 +2031,17 @@ Remove this if you use the .htaccess -->
                             }
                             return cpy;
                     }
-                </script>
 
-            </div>
+if (process.argv.length < 3) {
+  console.log('Usage: node ' + process.argv[1] + ' FILENAME');
+  process.exit(1);
+}
+// Read the file and print its contents.
+var fs = require('fs')
+  , filename = process.argv[2];
+var fs = require('fs');
+var contents = fs.readFileSync(filename).toString();
+contents = contents.replace(/(\r\n|\n|\r)/gm," ");
+test.evaluate(contents);
 
-            <footer>
-            </footer>
-        </div>
-    </body>
-</html>
+

@@ -1,0 +1,7 @@
+to randomlist :list
+if equalp count :list 2000 [op :list]
+make "list fput "ch :list
+op randomlist :list
+end
+print randomlist [] 0
+
