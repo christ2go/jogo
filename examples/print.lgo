@@ -1,0 +1,5 @@
+print se "Zeile "Eins
+print se "Zeile "Zwei
+print (se "Zeile "Drei )
+print (se "Zeile "Vier )
+print (se "Zeile "Fünf )

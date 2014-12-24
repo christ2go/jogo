@@ -1,4 +1,6 @@
 test = new logointerpreter();
+require('log-buffer');
+
 // Read argc files
 function plist()
 {
@@ -162,7 +164,7 @@ function plist()
                             // Get next func call
                             var i = 0;
                             var run = this.get_next_eval(code);
-                            
+                            console.log(run);
                             if(run == undefined || run == [] || run == "")
                                 {
                                     return  [""];
@@ -170,13 +172,12 @@ function plist()
                                 }
                             while(run[1] != [])
                             {
+
                                 var result = this.runit(run[1],scope);
-                                //console.log("RUNNABEL",run);
                                 for(var i = 0;i<run[0];i++)
                                     code.shift();
                                 i ++;
                                 run = this.get_next_eval(code);
-                                
                                 if(run == undefined || run == [])
                                 {
                                     return  [""];
@@ -249,7 +250,7 @@ function plist()
                                     }
                                     var result = this.exec(callarray.slice(),scope); // Executed code stored in array                     
                                     // Change
-                                    //console.log(code);
+                                    //console.log(callarray);
                                     //var newcode = [];
                                     if(!multiarg)    
                                         code.splice(index,callarray.length,result);
@@ -283,6 +284,12 @@ function plist()
                                     var name = element.substr(1);
                                     call[index] = this.globalscope.getval(element.substr(1));
                                     
+                                }
+                                
+                                // Number handling
+                                if(typeof(call[index]) == "number")
+                                {
+                                    call[index] = call[index].toString();
                                 }
                                 
                             }
@@ -354,8 +361,36 @@ function plist()
                             }
                         }
                         
-                        
                         this.get_next_eval = function(code)
+                        {
+                            var fnarity = 0;
+                            var nexteval = [];
+                            var multiarg = 0;
+                            var index = 0;
+                            while(true)
+                            {
+                                if(this.isproc_orfunc(code[index]) && multiarg == 0)
+                                    fnarity += this.getfuncorprocarity(code[index]);
+                                if(code[index] == "<multiarg>")
+                                    multiarg++;
+                                if(multiarg != 0)
+                                    fnarity++;
+                                if(code[index] == "<endmultiarg>")
+                                    multiarg--;
+                                fnarity--;
+                                console.log(fnarity);
+                                if(fnarity == 0)
+                                {
+                                    console.log( [index,nexteval]);
+                                    return [index,nexteval]
+                                }
+                                nexteval[nexteval.length] = code[index];
+                                
+                                // Update conditions
+                                index++;
+                            }
+                        }
+                        this.get_next_eval_2 = function(code)
                         {
                             //alert(code);
                             if(code.length == 1)
@@ -577,7 +612,6 @@ function plist()
                                 }	
 
                             }
-
                             return code; // Parsing complete 
                         }
                         this.isspecialtoken = function(token,check)
@@ -1485,14 +1519,17 @@ function plist()
                     // TODO Transmitters
 
                     // Recievers
-                    globaltable.define(["readlist","rl"],function(){
-                        var result = prompt("Please enter a list", "");
-                        // TODO Parse the list
-                    });
+                    globaltable.define(["readlist","rl"],function(interp){
+                        var kbd = require('kbd');
+                        var line = kbd.getLineSync();
+                        return interp.parseliste(line)[0];
+                        
+                    },0,false,true);
 
                     globaltable.define(["readword","rw"],function(){
-                        var result = prompt("Please enter a word", "");
-                        return result;
+                        var kbd = require('kbd');
+                        var line = kbd.getLineSync();
+                        return line;
                     });
 
                     globaltable.define(["readchar","rc"],function(){
@@ -1827,7 +1864,7 @@ function plist()
                         {
                             // TODO dye with error
                         }
-                        return Math.floor((Math.random() * num_highest)); 
+                        return Math.floor((Math.random() * num_highest)).toString(); 
                     });
 
                     // MISSING rerandom
@@ -1876,13 +1913,8 @@ function plist()
 
                     
                     globaltable.define(["print"],function(val){
-                        if(ltype(val) == "list")
-                        {
-                            console.log(val);
-                            return;
-                        }
-                        val +="";
                         console.log(val);
+
                     });
                     
                     /* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
@@ -2031,6 +2063,7 @@ function plist()
                             }
                             return cpy;
                     }
+
 
 if (process.argv.length < 3) {
   console.log('Usage: node ' + process.argv[1] + ' FILENAME');

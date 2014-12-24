@@ -1,0 +1,8 @@
+to reverse :stuff
+ifelse equal? count :stuff 1
+[output first :stuff]
+[output sentence reverse butfirst :stuff first :stuff]
+end
+
+print reverse [harvard at be to enjoyed]
+

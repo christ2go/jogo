@@ -1,0 +1,6 @@
+to factorial :number
+if equalp :number 1 [output 1]
+output product :number factorial difference :number 1
+end
+print factorial readword
+

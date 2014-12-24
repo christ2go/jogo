@@ -1,7 +1,2 @@
-to randomlist :list
-if equalp count :list 2000 [op :list]
-make "list fput "ch :list
-op randomlist :list
-end
-print randomlist [] 0
-
+print (sqrt 4) + 6
+print sqrt 4 + 6
