@@ -1,0 +1,7 @@
+to le :list
+if equalp count :list 200 [op :list]
+make "list fput random 400 :list
+op le :list
+end
+
+print le []

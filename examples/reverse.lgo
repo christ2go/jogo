@@ -4,5 +4,5 @@ ifelse equal? count :stuff 1
 [output sentence reverse butfirst :stuff first :stuff]
 end
 
-print reverse [harvard at be to enjoyed]
+print reverse readword
 

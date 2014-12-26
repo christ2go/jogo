@@ -1,6 +1,7 @@
 test = new logointerpreter();
-require('log-buffer');
+//require('log-buffer');
 
+// Multiarg Bug
 // Read argc files
 function plist()
 {
@@ -164,7 +165,6 @@ function plist()
                             // Get next func call
                             var i = 0;
                             var run = this.get_next_eval(code);
-                            console.log(run);
                             if(run == undefined || run == [] || run == "")
                                 {
                                     return  [""];
@@ -187,81 +187,68 @@ function plist()
                         };
                         this.runit = function(code,scope)
                         {
-                            if(this.globalscope.op == true)
+                            if(this.globalscope.op !== undefined)
                             {
-                                return;
+                                return [];
                             }
                             var code = code.splice(0);
-                            //alert(">>",code);
-                            if(code.length == 1 && !this.isproc_orfunc(code[0]))
+                            //
+                            if(code == undefined)
+                                return code;
+                            if(code.length <= 1)
                             {
-                                return code;	
+                                return code;
                             }
-                            //console.log("Recieved code:",code);
-                            if(!code)
+                            var nexteval = [];
+                            var multiarg = false;
+                            for(var index = code.length-1;index>=0;index--)
                             {
-                                //alert("Code is missing");	
-                            }
-                            // 1 st to
-                            var callarray = []; 
-                            for(var index = code.length-1;index >= 0;index --)
-                            {
-                                if(this.globalscope.op !== undefined)
-                                {
-                                    return [];
-                                }
-                                //console.log(code[index]);
-                                if(!this.isproc_orfunc(code[index]))
-                                {
-                                    callarray.unshift(code[index]);	
-                                }else{
-                                    // Get callarray
-                                    // Check for multiarg
-                                    var multiarg = false;
-                                    //alert(code[index-1]);
-                                    if(code[index-1] == "<multiarg>")
-                                    {
-                                        //console.log("Could this be mutiarg?");
-                                        multiarg = true;	
-                                    }else{
-                                        //console.log("No multiarg:"+code[index]);	
-                                    }
-                                    //console.log(multiarg);
-                                    callarray.unshift(code[index]); // Add funcname to array
-                                    if(multiarg == false)
-                                    {
-                                        callarray = callarray.splice(0,this.getfuncorprocarity(code[index])+1);
-                                    }
-                                    else
-                                    {
-                                        if(callarray.indexOf("<endmultiarg>") == callarray.length-1)
-                                        {	
-                                            callarray.pop();
+                                // Add to arrays
+                                nexteval.unshift(code[index]);
 
-                                        }
-                                        else
-                                        {
-                                            //allarray.splice(-1,1);
-                                            callarray.splice(callarray.indexOf("<endmultiarg>"));
-                                            // Lets also remove it from "newcode"
-                                            code.splice(callarray.length+index-1);
-                                           
-                                        }
-                                    }
-                                    var result = this.exec(callarray.slice(),scope); // Executed code stored in array                     
-                                    // Change
-                                    //console.log(callarray);
-                                    //var newcode = [];
-                                    if(!multiarg)    
-                                        code.splice(index,callarray.length,result);
-                                    else
-                                        code.splice(index-1,callarray.length+2,result);
-                                    
-                                    // Generated call array correctly
-                                    // Don't do more :-)
-                                    return this.runit(code);
+                                if(this.isproc_orfunc(code[index]) && code[index-1] !== "<multiarg>")
+                                {
+                                    multiarg = false;    
+                                    break;
+                                }
+                                if(this.isproc_orfunc(code[index]) && code[index-1] == "<multiarg>")
+                                {
+                                    multiarg = true;    
+                                    break;
                                 }
                             }
+
+                            if(multiarg)
+                            {
+                                nexteval.splice(nexteval.indexOf("<endmultiarg>"),Number.MAX_VALUE);
+
+                            }else
+                            {
+
+                                nexteval.splice(this.getfuncorprocarity(nexteval[0])+1,Number.MAX_VALUE);                    
+                            }
+                            var callarray = nexteval.slice(0);
+                            //console.log("Xalling "+callarray);
+                            if(callarray.length == 0)
+                                return code;
+                            var result = this.exec(callarray.slice(),scope); // Executed code stored in array  
+                            //console.log(result);
+                            //console.log(code);
+                            // Change
+                            //console.log(callarray);
+                            //var newcode = [];
+                            if(!multiarg)    
+                                code.splice(index,callarray.length,result);
+                            else
+                                code.splice(index-1,callarray.length+2,result);
+                            //console.log(code);
+                            if(code == undefined)
+                            {
+                                return code;
+                            }
+
+                            return this.runit(code);
+
                         };
                         this.exec = function(call,scope)
                         {
@@ -363,36 +350,8 @@ function plist()
                         
                         this.get_next_eval = function(code)
                         {
-                            var fnarity = 0;
-                            var nexteval = [];
-                            var multiarg = 0;
-                            var index = 0;
-                            while(true)
-                            {
-                                if(this.isproc_orfunc(code[index]) && multiarg == 0)
-                                    fnarity += this.getfuncorprocarity(code[index]);
-                                if(code[index] == "<multiarg>")
-                                    multiarg++;
-                                if(multiarg != 0)
-                                    fnarity++;
-                                if(code[index] == "<endmultiarg>")
-                                    multiarg--;
-                                fnarity--;
-                                console.log(fnarity);
-                                if(fnarity == 0)
-                                {
-                                    console.log( [index,nexteval]);
-                                    return [index,nexteval]
-                                }
-                                nexteval[nexteval.length] = code[index];
-                                
-                                // Update conditions
-                                index++;
-                            }
-                        }
-                        this.get_next_eval_2 = function(code)
-                        {
-                            //alert(code);
+                            if(code == undefined)
+                                return;
                             if(code.length == 1)
                             {
                                 if(this.isproc_orfunc(code[0]))
@@ -424,33 +383,34 @@ function plist()
 
                                     for(var index=0;index<=funcarity;index++)
                                     {
-                                        if(index == code.length)
-                                        {
-                                            return [index,callarrray];
-                                        }
+                                        callarrray[callarrray.length] = code[index];
                                         if(code[index] == "<multiarg>")
                                         {
                                             multivar++;	
                                         }
+                                        
                                         if(multivar != 0)
                                         {
                                             funcarity++;
                                         }
+                                        
                                         if(code[index] == "<endmultiarg>")
                                         {
-                                            multivar --;
+                                            multivar--;
                                         }
-                                        if(code[0] == "<multiarg>" && multivar == 0 && code[index] == "<endmultiarg>") 
+                                        
+                                        if(multivar == 0 && (funcarity-callarrray.length) == 0 && code[index] == "<endmultiarg>") 
                                         {
-                                            callarrray[callarrray.length] = code[index];
-                                            return [index+1,callarrray];
+                                            //console.log(callarrray);
+                                            return [index,callarrray];
                                         }
+                                        
                                         if(this.isproc_orfunc(code[index]) && code[index-1] != "<multiarg>")
                                         {
                                             funcarity += this.getfuncorprocarity(code[index]);
                                         }
-                                        callarrray[callarrray.length] = code[index];
-
+                                       
+                                        
                                     }
                                     // MAYBE SPLICE CODE HERE --> no longer needed ?!
                                     return [index,callarrray];
@@ -1216,9 +1176,9 @@ function plist()
                                     {
                                         for(var
                                             i = 0;i<arguments[index].length;i++)
-                                            newlist[newlist.length] = arguments[index][i];
+                                            newlist[newlist.length] = arguments[index][i]+"";
                                     }else{
-                                            newlist[newlist.length] = arguments[index];
+                                            newlist[newlist.length] = arguments[index]+"";
                                     }
                                 }
                                 return newlist;
@@ -2064,7 +2024,8 @@ function plist()
                             return cpy;
                     }
 
-
+console.log("LJR (LOGO JAVASCRIPT RUNTIME) CROWN LOGO VERSION 0.0.1");
+console.log("(c) Christian Albert Hagemeier, 2014");
 if (process.argv.length < 3) {
   console.log('Usage: node ' + process.argv[1] + ' FILENAME');
   process.exit(1);
