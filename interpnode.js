@@ -306,6 +306,7 @@ function plist()
                                 
                                 var res = this.globalscope.op;
                                 this.globalscope.leavelocal();
+				
                                 return res;
                             }else{
                             
@@ -342,7 +343,12 @@ function plist()
                                                 res = "\""+res;
                                             }
                                         }
-                                        return res;
+                                        
+					if(typeof(res) == "boolean")
+					{  
+					  return res.toString();
+					}
+					return res;
                                     }	
                                 }
                             }
@@ -1402,7 +1408,6 @@ function plist()
                     });
 
                     globaltable.define(["equalp","equal?"],function(a,b){
-
                         if(a == b)
                         {
                             return true;
@@ -1874,8 +1879,8 @@ function plist()
                     
                     globaltable.define(["print"],function(val){
                         console.log(val);
-
-                    });
+		      
+		    });
                     
                     /* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
 					 * GET ACCESS TO VARIABLES
@@ -1905,12 +1910,22 @@ function plist()
                      *
                      */
                     globaltable.define(["if"],function(tfxpr,runlist,interp){
+			tfxpr = converttotf(tfxpr);
                         if(tfxpr == true)
                             interp.evaluate(betterjoin(runlist));
                     },2,false,true);
+		    function converttotf(tf)
+		    {
+		      if(tf == "true")
+			return true;
+		      if(tf == "wahr")
+			return true
+		      return falser
+		    }
                     
                     globaltable.define(["ifelse"],function(tfxpr,runlist,elserun,interp){
-                        if(tfxpr == true)
+                      tfxpr = converttotf(tfxpr);  
+		      if(tfxpr == true)
                             interp.evaluate(betterjoin(runlist));
                         else
                             interp.evaluate(betterjoin(elserun));
@@ -1919,7 +1934,8 @@ function plist()
                     // WHILE LOOP
                               
                     globaltable.define(["while"],function(tflist,runlist,interp){
-                        while(interp.evaluate(betterjoin(tflist)))
+                        
+			while(converttotf(tfxprinterp.evaluate(betterjoin(tflist))))
                         {
                               interp.evaluate(betterjoin(runlist));
                               
@@ -1949,6 +1965,12 @@ function plist()
                             interp.evaluate(betterjoin(code));
                         }
                     },2,true,true);
+		    
+		    globaltable.define(["loadm"],function(modulename){
+		      var fs = require("fs");
+		      eval(fs.readFileSync("modules/"+modulename+"/"+modulename+".js", "utf8"));
+		      
+		    });
                     function isNormalInteger(str) {
                         var n = ~~Number(str);
                         return String(n) === str && n >= 0;

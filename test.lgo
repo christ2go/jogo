@@ -1,2 +1,6 @@
-print (sqrt 4) + 6
-print sqrt 4 + 6
+loadm "mysql
+make "x mysqlconnect "mundusromanus.com "root "latein "spiel 
+ifelse :x [print "ok] [print (se "Connection "error )]
+make "user "christ2go
+print (se "SELECT "* "from "user )
+
