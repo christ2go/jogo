@@ -1,5 +1,5 @@
 loadm "mysql
-make "x mysqlconnect "mundusromanus.com "root "latein "spiel 
+make "x mysqlconnect "mundusromanus.com "root "secret "spiel 
 ifelse :x [print "ok] [print (se "Connection "error )]
 make "user "christ2go
 print (se "SELECT "* "from "user )
