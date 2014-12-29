@@ -195,6 +195,8 @@ function plist()
                             //
                             if(code == undefined)
                                 return code;
+                            if(code.length == 1 && this.isproc_orfunc(code[0]))
+                                return this.exec(code.slice(),scope);
                             if(code.length <= 1)
                             {
                                 return code;
@@ -225,7 +227,10 @@ function plist()
                             }else
                             {
 
-                                nexteval.splice(this.getfuncorprocarity(nexteval[0])+1,Number.MAX_VALUE);                    
+if(this.getfuncorprocarity(nexteval[0]) !== 0)
+    nexteval.splice(this.getfuncorprocarity(nexteval[0])+1,Number.MAX_VALUE);                    
+else
+    nexteval = [nexteval[0]];
                             }
                             var callarray = nexteval.slice(0);
                             //console.log("Xalling "+callarray);
@@ -1503,12 +1508,12 @@ function plist()
                     // TODO Transmitters
 
                     // Recievers
-                    globaltable.define(["readlist","rl"],function(interp){
-                        var kbd = require('kbd');
-                        var line = kbd.getLineSync();
-                        return interp.parseliste(line)[0];
+                    globaltable.define(["readlist","rl"],function(){
+                        var kbd = require('readline-sync');
+                        var line = kbd.question("Enter a list:");
+                        return test.parseliste("["+line+"]")[0];
                         
-                    },0,false,true);
+                    });
 
                     globaltable.define(["readword","rw"],function(){
                         var kbd = require('kbd');
@@ -1898,8 +1903,7 @@ function plist()
                     
                     globaltable.define(["print"],function(val){
                         console.log(val);
-		      
-		    });
+		          });
                     
                     /* WORKSPACE MANAGEMENT FUNCTIONS --- SPECIAL FORM
 					 * GET ACCESS TO VARIABLES
@@ -1987,6 +1991,11 @@ function plist()
 		    
 		    globaltable.define(["loadm"],function(modulename){
 		      var fs = require("fs");
+              // Check if file exists
+              if(!fs.existsSync("modules/"+modulename+"/"+modulename+".js") )
+              {
+                throwerror("Module {0} doesn't exist!",modulename);
+              }
 		      eval(fs.readFileSync("modules/"+modulename+"/"+modulename+".js", "utf8"));
 		      
 		    });

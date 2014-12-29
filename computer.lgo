@@ -1,0 +1,8 @@
+to me
+print (se "Wilkommen "im "Computer "Emulator )
+print (se "Bitte "geben "sie "ein "Kommando "ein )
+make "instr readlist
+print first :instr
+if equalp item 1 :instr "lda [ print "loading ]
+end
+me
