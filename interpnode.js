@@ -1,7 +1,6 @@
 test = new logointerpreter();
 //require('log-buffer');
 
-// Multiarg Bug
 // Read argc files
 function plist()
 {
@@ -93,6 +92,7 @@ function plist()
                             
                             if(varname in this.vars)
                             {
+                                
                                 if(ltype(this.vars[varname]) == "list")
                                 {
                                     return this.vars[varname].slice(0);
@@ -861,6 +861,12 @@ function plist()
                         {
                             // Append to any kind of array
                         };
+                        this.prclassaccess = [];
+
+                        this.classaccess = function(prname)
+                        {
+                            this.prclassaccess[this.prclassaccess.length] = prname;    
+                        };
                         this.procedures = [];
                         this.define_procedure = function(prname,inputs,body)
                         {
@@ -1095,18 +1101,25 @@ function plist()
                         {
                             return "word";
                         }
-                        if(typeof atom === 'object')
-                        {
-                            return "list";
-                        }
-                        if(typeof atom === 'number')
+                                                if(typeof atom === 'number')
                         {
                             return "number";
                         }
 
+                        if( Object.prototype.toString.call( atom ) === '[object Array]' ) 
+                        {
+                            return "list";
+                        }else{
+                            return "lclass";
+                        }
+
+
                         // TODO Throw error => not a Logo Type but bollean maybe?
                     }
-
+                    function throwerror()
+                    {
+                        // Do a str_replace => output => check for onerr
+                    }
                     function parseNum(number)
                     {
                         // A function for parsing strings to numbers (conversion)
@@ -1125,10 +1138,15 @@ function plist()
                     // Constructors
                     globaltable.define(["list"],function(a,b){
                         // n elements but at least 2
+                        if(a.hasOwnProperty("lclass"))
+                        {
+                            throwerror("Function list can't use a javascript class.");
+                        }
                         if(!a || !b)
                         {
                             // Not enough inputs
                             // TODO Throw an error
+                            
 
                         }
                         var liste = [];
@@ -1141,6 +1159,7 @@ function plist()
 
                     },-1);
 
+                    
                     globaltable.define(["word"],function(a,b){
                         // n elements but at least 2
                         if(!a || !b)
@@ -1265,7 +1284,7 @@ function plist()
                         }
                         if(list.length == 0)
                         {
-                            return "";
+                            throwerror("Can't 'first' an empty list/string")
                         }
                         return list[0];
 
@@ -1440,16 +1459,16 @@ function plist()
                         // TODO Type Checking (wordorlist)
                         return (wordorlist.length);
                     });
-                    globaltable.define(["ascii"],function(char){
-                        if(ltype(char) != "word")
+                    globaltable.define(["ascii"],function(chare){
+                        if(ltype(chare) != "word")
                         {
                             // TODO Throw Type Error
                         }
-                        if(char.length != 1)
+                        if(chare.length != 1)
                         {
                             // TODO Throw length error (return 0)
                         }
-                        return char[0].charCodeAt(0);
+                        return chare[0].charCodeAt(0);
                     });
                     // MISSING rawascii
                     globaltable.define(["char"],function(x){
@@ -1910,17 +1929,17 @@ function plist()
                      *
                      */
                     globaltable.define(["if"],function(tfxpr,runlist,interp){
-			tfxpr = converttotf(tfxpr);
+			             tfxpr = converttotf(tfxpr);
                         if(tfxpr == true)
                             interp.evaluate(betterjoin(runlist));
                     },2,false,true);
 		    function converttotf(tf)
 		    {
 		      if(tf == "true")
-			return true;
+			     return true;
 		      if(tf == "wahr")
-			return true
-		      return falser
+			     return true
+		      return false
 		    }
                     
                     globaltable.define(["ifelse"],function(tfxpr,runlist,elserun,interp){

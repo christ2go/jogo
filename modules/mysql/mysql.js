@@ -1,4 +1,4 @@
-var modpath = "/home/christian/jogo/modules/"
+var modpath = "/Applications/XAMPP/xamppfiles/htdocs/jogo/modules/";
 // Later to be global
 var lmodule_mysql = function()
 {
@@ -50,6 +50,7 @@ var lmodule_mysql = function()
     // Deactivates / Activates security mode (strings get escaped before running)
     
   };
+  this.islclass = true;
 }
 // Function for escaping mysql strings
 // Taken from http://stackoverflow.com/questions/7744912/making-a-javascript-string-sql-friendly
@@ -78,12 +79,10 @@ function mysql_real_escape_string (str) {
     });
 }
 
-var lmodule_msql_instance = new lmodule_mysql(); 
 globaltable.define(["mysqlconnect"],function(host,username,pw,db){
-  if(lmodule_msql_instance.connect(host,username,pw,db) == "1")
-    return true
-  else
-    return false
+  var mysqlcon = new lmodule_mysql();
+  mysqlcon.connect(host,username,pw,db);
+  return mysqlcon;
   
   
 });
